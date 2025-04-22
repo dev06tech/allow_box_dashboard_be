@@ -13,7 +13,11 @@ const envVarsSchema = Joi.object()
         PORT: Joi.number().default(3000),
         FRONTEND_URL: Joi.string().required().description("Frontend url"),
         MONGODB_URL: Joi.string().required().description("Mongo DB url"),
-        ALLOWED_ORIGINS: Joi.string().description("List of CORS Allowed origins")
+        ALLOWED_ORIGINS: Joi.string().description("List of CORS Allowed origins"),
+        JWT_SECRET: Joi.string().required().description("JWT secret key"),
+        JWT_EXPIRY: Joi.string().description("JWT expiration time "),
+        MAX_UPLOAD_SIZE: Joi.number().description("Maximum upload size in bytes"),
+
     })
     .unknown();
 
@@ -36,5 +40,12 @@ module.exports = {
     cors: {
         allowedOrigins: envVars.ALLOWED_ORIGINS,
     },
+    jwt: {
+        secret: envVars.JWT_SECRET,
+        expiry: envVars.JWT_EXPIRY,
+    },
+    upload: {
+        maxSize: envVars.MAX_UPLOAD_SIZE,
+    }
 
 };

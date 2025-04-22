@@ -13,7 +13,7 @@ const { errorConverter, errorHandler } = require("./middlewares/error");
 const ApiError = require("./utils/ApiError");
 
 //Routes
-//const recipeListingRoutes = require('./routes/listedRecipe');
+const userRoutes = require('./routes/user.routes');
 
 const app = express();
 const server = http.createServer(app);
@@ -59,7 +59,7 @@ if (config.env === "production") {
   app.use("/v1/auth", authLimiter);
 }
 
-//app.use("/api/recipe-listing", recipeListingRoutes);
+app.use("/api/user", userRoutes);
 
 
 

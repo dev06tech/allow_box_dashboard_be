@@ -3,12 +3,18 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
+const { default: httpStatus } = require("http-status"); 
 
-var userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     fullName: {
         type: String,
         trim: true,
-        required: true
+        required: true,
+        validate(value) {
+            if (!value.match(/^[a-zA-Z ]+$/)) {
+                throw new Error("Name must contain only letters and spaces");
+            }
+        },
     },
     email: {
         type: String,
@@ -33,8 +39,8 @@ var userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        required: true,
-        enum: ["super-admin", "admin", "school-admin", "teacher", "student", "parent"],
+        enum: ["admin", "school-admin", "teacher", "student", "parent"],
+        default: null,
     },
     registrationOtp: {
         type: String,
@@ -76,7 +82,7 @@ userSchema.methods.generateRegistrationToken = async function () {
     const token = jwt.sign({ _id: user._id.toString() }, config.jwt.secret, {
         expiresIn: config.jwt.expiry,
     });
-    user.tokens = user.registrationToken.concat({ token });
+    user.registrationToken = user.registrationToken.concat({ token });
     await user.save();
     return token;
 };
@@ -96,6 +102,7 @@ userSchema.methods.getPublicProfile = function () {
     const user = this;
     const userObject = user.toObject();
     delete userObject.password;
+    delete userObject.registrationToken;
     delete userObject.tokens;
 
     return userObject;
@@ -104,11 +111,17 @@ userSchema.methods.getPublicProfile = function () {
 userSchema.statics.findByEmailCredentials = async (email, password) => {
     const user = await User.findOne({ email });
     if (!user) {
-        throw new Error("Unable to login");
+        throw { 
+            statusCode: httpStatus.NOT_FOUND, 
+            message: "Incorrect email or password" 
+        };
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-        throw new Error("Unable to login");
+        throw { 
+            statusCode: httpStatus.UNAUTHORIZED, 
+            message: "Incorrect email or password" 
+        };
     }
     return user;
 };

@@ -13,7 +13,8 @@ const { errorConverter, errorHandler } = require("./middlewares/error");
 const ApiError = require("./utils/ApiError");
 
 //Routes
-const userRoutes = require('./routes/user.routes');
+const userRoutes = require('./routes/allow-box/user.routes');
+const superAdminRoutes = require('./routes/slate/superAdmin.routes');
 
 const app = express();
 const server = http.createServer(app);
@@ -59,9 +60,8 @@ if (config.env === "production") {
   app.use("/v1/auth", authLimiter);
 }
 
-app.use("/api/user", userRoutes);
-
-
+app.use("/api/allow-box/user", userRoutes);
+app.use("/api/slate/super-admin", superAdminRoutes);
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {

@@ -17,6 +17,9 @@ const envVarsSchema = Joi.object()
         JWT_SECRET: Joi.string().required().description("JWT secret key"),
         JWT_EXPIRY: Joi.string().description("JWT expiration time "),
         MAX_UPLOAD_SIZE: Joi.number().description("Maximum upload size in bytes"),
+        GOOGLE_CLIENT_ID: Joi.string().required().description("Google client ID"),
+        GOOGLE_CLIENT_SECRET: Joi.string().required().description("Google client secret"),
+        GOOGLE_REDIRECT_URI: Joi.string().required().description("Google redirect URI"),
 
     })
     .unknown();
@@ -46,6 +49,11 @@ module.exports = {
     },
     upload: {
         maxSize: envVars.MAX_UPLOAD_SIZE,
-    }
+    },
+    google: {
+        clientId: envVars.GOOGLE_CLIENT_ID,
+        clientSecret: envVars.GOOGLE_CLIENT_SECRET,
+        redirectUri: envVars.GOOGLE_REDIRECT_URI,
+    },
 
 };

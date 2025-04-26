@@ -1,21 +1,20 @@
 const logger = require("../config/logger")
 const User = require("../models/user.model")
+const googleAuthService = require("../services/google.service")
+const { default: httpStatus } = require("http-status")
+const crypto = require("crypto")
 
-const getUserRole = (email) => {
-    //super admin and admin roles can only access 
+// const checkIsSuperAdminEmail = (email) => {
+//     //super admin and admin roles can only access 
 
-    const superAdmins = ["jranjan2017@gmail.com", "giri943@gmail.com"]
-    const admins = ["girish.soman@schbang.com", "jyoti.biswal@schbang.com"]
-    if (superAdmins.includes(email)) {
-        return "super-admin"
-    }
-    else if (admins.includes(email)) {
-        return "admin"
-    }
-    else {
-        return null
-    }
-}
+//     const superAdmins = ["jranjan2017@gmail.com", "giri943@gmail.com"]
+//     if (superAdmins.includes(email)) {
+//         return "super-admin"
+//     }
+//     else {
+//         return null
+//     }
+// }
 const generateOTP = () => {
     const min = 100000;
     const max = 999999;
@@ -24,24 +23,21 @@ const generateOTP = () => {
 
 
 const createUser = (userData) => {
-    const { fullName, email, password, selectedRole } = userData;
-    const roleCheck = getUserRole(email);
-    const role = roleCheck ? roleCheck : selectedRole;
+    const { fullName, email, password } = userData;
     const registrationOtp = generateOTP();
     const newUser = {
         fullName,
         email,
         password,
-        role,
         registrationOtp,
     };
     return new Promise(async (resolve, reject) => {
         try {
             let user = new User(newUser);
             await user.save();
-            let token = await user.generateRegistrationToken();
+           const registrationToken = await user.generateRegistrationToken();
             user = user.getPublicProfile();
-            resolve({ user, token });
+            resolve({ user, registrationToken });
         } catch (error) {
             reject(error);
         }
@@ -53,10 +49,19 @@ const verifyEmailAndOtp = (email, otp) => {
         try {
             const user = await User.findOne({ email, registrationOtp: otp });
             if (!user) {
-                return reject(new Error("Invalid OTP or email provided"));
+                return reject({ 
+                    statusCode: httpStatus.BAD_REQUEST, 
+                    message: "Invalid OTP or email provided" 
+                });
+            }
+            if(user.isEmailVerified) {
+                return reject({ 
+                    statusCode: httpStatus.BAD_REQUEST, 
+                    message: "Email already verified" 
+                });
             }
             user.isEmailVerified = true;
-            user.save()
+            await user.save();
             resolve(user.getPublicProfile());
         } catch (error) {
             reject(error);
@@ -69,7 +74,10 @@ const login = (email, password) => {
         try {
             const user = await User.findByEmailCredentials(email, password);
             if (!user.isEmailVerified) {
-                return reject(new Error("Please verify your email first"));
+                return reject({ 
+                    statusCode: httpStatus.FORBIDDEN,
+                    message: "Please verify your email first" 
+                });
             }
             let token = await user.generateAuthToken();
             resolve({ user: user.getPublicProfile(), token });
@@ -92,9 +100,46 @@ const logout = (user, token) => {
     })
 }
 
+const processGoogleAuth = async (code) => {
+    try {
+        const googleProfile = await googleAuthService.verifyGoogleToken(code);
+        const { name, email, isEmailVerified, hd } = googleProfile;
+        let user = await User.findOne({ email });
+        if (!user) {
+            const randomPassword = crypto.randomBytes(16).toString('hex') + 'Aa1!';
+            user = new User({
+                fullName: name,
+                email,
+                password: randomPassword,
+                isEmailVerified: isEmailVerified ? true : false,
+                registeredVia: 'google',
+                isLoggedIn: true,
+            });
+            await user.save();
+            await user.generateRegistrationToken();
+            const authToken = await user.generateAuthToken();
+            return { user: user.getPublicProfile(), token: authToken };
+        }
+        user.isEmailVerified = isEmailVerified ? true : false;
+        user.isLoggedIn = true;
+        await user.save();
+        const authToken = await user.generateAuthToken();
+        return { user: user.getPublicProfile(), token:authToken };
+
+    } catch (error) {
+        logger.error(`Google auth processing error: ${error.message}`);
+        throw {
+            statusCode: error.statusCode || httpStatus.INTERNAL_SERVER_ERROR,
+            message: error.message
+        };
+    }
+};
+
+
 module.exports = {
     createUser,
     verifyEmailAndOtp,
     login,
-    logout
+    logout,
+    processGoogleAuth
 };

@@ -1,0 +1,102 @@
+const { Router } = require("express");
+const { default: httpStatus } = require('http-status');
+const router = Router();
+const config = require('../../config/config');
+const { createConnection, getConnectionUrl, verifyGoogleToken } = require('../../services/google.service');
+
+
+const { validateRegistration, validateEmailVerification, validateLogin } = require('../../middlewares/validations/user.validations');
+const { 
+  userAuth,
+  isRegisteredUser } = require("../../middlewares/userAuth");
+const userController = require("../../controllers/User.controller");
+
+router.post("/register", validateRegistration, async (req, res, next) => {
+  const { fullName, email, password } = req.body;
+  try {
+    const user = await userController.createUser({ fullName, email, password });
+    res.status(httpStatus.CREATED).json(user);
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post("/verify-email", validateEmailVerification, isRegisteredUser, async (req, res, next) => {
+  const { email, otp } = req.body;
+  if (!otp) {
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message: "Please Provide OTP"
+    });
+  }
+  if (!email) {
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message: "Please Provide Email"
+    });
+  }
+  try {
+    const user = await userController.verifyEmailAndOtp(email, otp);
+    res.status(httpStatus.OK).json(user);
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post("/login",validateLogin, async (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email) {
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message: "Please Provide Email"
+    });
+  }
+  if (!password) {
+    return res.status(httpStatus.BAD_REQUEST).json({
+      message: "Please Provide Password"
+    });
+  }
+  try {
+    const user = await userController.login(email, password);
+    res.status(httpStatus.OK).json(user);
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get("/get-auth-url", (req, res, next) => {
+  try {
+    const auth = createConnection();
+    const connectonURL = getConnectionUrl(auth);
+    res.send(connectonURL);
+  } catch (error) {
+    next(error)
+  }
+})
+
+//Gets the user data
+//Need to pass 'code' value from the Url to get the profile payload
+
+router.post("/get-profile", async (req, res, next) => {
+  const { code } = req.body;
+  if (!code) {
+    return res.status(httpStatus.BAD_REQUEST).send("Auth Code is required")
+  }
+  try {
+    const verified = await userController.processGoogleAuth(code)
+    res.status(httpStatus.OK).send(verified)
+
+
+  } catch (error) {
+    next(error)
+  }
+
+});
+
+router.post("/logout", userAuth, async (req, res, next) => {
+  try {
+    const user = await userController.logout(req.user, req.token);
+    res.status(httpStatus.OK).json({ status: true, message: "Logged out successfully" });
+  } catch (error) {
+    next(error)
+  }
+})
+
+module.exports = router;

@@ -17,6 +17,9 @@ const superAdminAuth = async (req, res, next) => {
             if (!superAdmin) {
                 return res.status(httpStatus.NOT_FOUND).json({ message: 'Super Admin not found' });
             }
+            if (!superAdmin.isLoggedIn) {
+                return res.status(httpStatus.UNAUTHORIZED).json({ message: 'Super Admin is logged out' });
+            }
             if (decoded.exp * 1000 < Date.now()) {
                 superAdmin.tokens = superAdmin.tokens.filter(t => t.token !== token);
                 superAdmin.isLoggedIn = false;

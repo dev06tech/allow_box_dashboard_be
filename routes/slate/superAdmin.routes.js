@@ -22,7 +22,7 @@ router.post("/login", validateLogin, async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await superAdminController.login(email, password);
-    res.status(httpStatus.OK).json({status:true, message: "Logged in successfully", user});
+    res.status(httpStatus.OK).json(user);
   } catch (error) {
     next(error)
   }

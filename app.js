@@ -15,7 +15,7 @@ const ApiError = require("./utils/ApiError");
 //Routes
 const userRoutes = require('./routes/allow-box/user.routes');
 const superAdminRoutes = require('./routes/slate/superAdmin.routes');
-const emailTemplateRoutes = require('./routes/slate/emailTemplates');
+const emailTemplateRoutes = require('./routes/slate/emailTemplates.routes');
 
 const app = express();
 const server = http.createServer(app);

@@ -3,7 +3,7 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
-const { default: httpStatus } = require("http-status"); 
+const { default: httpStatus } = require("http-status");
 
 const userSchema = new mongoose.Schema({
     fullName: {
@@ -67,6 +67,9 @@ const userSchema = new mongoose.Schema({
         enum: ["email", "google", "facebook"],
         default: "email",
     },
+    passworResetToken: {
+        type: String,
+    },
     tokens: [
         {
             token: {
@@ -83,6 +86,16 @@ userSchema.methods.generateRegistrationToken = async function () {
         expiresIn: config.jwt.expiry,
     });
     user.registrationToken = user.registrationToken.concat({ token });
+    await user.save();
+    return token;
+};
+
+userSchema.methods.generatePasswordResetToken = async function () {
+    const user = this;
+    const token = jwt.sign({ _id: user._id.toString() }, config.jwt.secret, {
+        expiresIn: config.jwt.expiry,
+    });
+    user.passworResetToken = token;
     await user.save();
     return token;
 };
@@ -104,23 +117,24 @@ userSchema.methods.getPublicProfile = function () {
     delete userObject.password;
     delete userObject.registrationToken;
     delete userObject.tokens;
+    delete userObject.passworResetToken;
 
     return userObject;
 };
 
-userSchema.statics.findByEmailCredentials = async (email, password) => {    
+userSchema.statics.findByEmailCredentials = async (email, password) => {
     const user = await User.findOne({ email });
     if (!user) {
-        throw { 
-            statusCode: httpStatus.NOT_FOUND, 
-            message: "Incorrect email or password" 
+        throw {
+            statusCode: httpStatus.NOT_FOUND,
+            message: "Incorrect email or password"
         };
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-        throw { 
-            statusCode: httpStatus.UNAUTHORIZED, 
-            message: "Incorrect email or password" 
+        throw {
+            statusCode: httpStatus.UNAUTHORIZED,
+            message: "Incorrect email or password"
         };
     }
     return user;

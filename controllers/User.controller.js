@@ -1,8 +1,11 @@
+const config = require("../config/config")
 const logger = require("../config/logger")
 const User = require("../models/user.model")
+const EmailTemplate = require("../models/emailTempate.model")
 const googleAuthService = require("../services/google.service")
 const { default: httpStatus } = require("http-status")
 const crypto = require("crypto")
+
 
 // const checkIsSuperAdminEmail = (email) => {
 //     //super admin and admin roles can only access 
@@ -149,12 +152,37 @@ const changePassword = (email, oldPassWord, newPassword) => {
     })
 }
 
-
+const forgotPassword = (email) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findOne({ email });
+            if (!user) {
+                return reject({
+                    statusCode: httpStatus.NOT_FOUND,
+                    message: "User not found"
+                });
+            }
+            const passwordResetToken = await user.generatePasswordResetToken();
+            const emailTemplate = await EmailTemplate.findOne({ type: "reset-password" });
+            if (emailTemplate && emailTemplate.emailContent) {
+                let emailContent = emailTemplate.emailContent;
+                emailContent = emailTemplate.emailContent.replace("{{passwordResetToken}}",
+                    `<a href="${config.frontend}/password-reset/${passwordResetToken}">${config.frontend}/password-reset/${passwordResetToken}</a>`
+                );
+                emailTemplate.emailContent = emailContent;                
+            }
+            resolve({ user: user.getPublicProfile(), emailTemplate });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
 module.exports = {
     createUser,
     verifyEmailAndOtp,
     login,
     logout,
     processGoogleAuth,
-    changePassword
+    changePassword,
+    forgotPassword
 };

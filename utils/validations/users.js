@@ -37,9 +37,14 @@ const updatePasswordSchema = Joi.object({
     })
 }).strict();
 
+const forgotPasswordSchema = Joi.object({
+    email: Joi.string().email().required().messages({'string.empty': 'Email is required'}),
+}).strict();
+
 module.exports = {
     registrationSchema,
     emailVerificationSchema,
     loginSchema,
-    updatePasswordSchema
+    updatePasswordSchema,
+    forgotPasswordSchema
 }

@@ -21,6 +21,7 @@
     "express": "^4.21.2",
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^7.5.0",
+    "googleapis": "^148.0.0",
     "helmet": "^8.1.0",
     "http": "^0.0.1-security",
     "http-status": "^2.1.0",

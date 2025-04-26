@@ -90,5 +90,5 @@ superAdminSchema.methods.getPublicProfile = function () {
     return superAdminObject;
 };
 
-const SuperAdmin = mongoose.model("SuperAdmin", superAdminSchema);
+const SuperAdmin = mongoose.model("super-admin", superAdminSchema);
 module.exports = SuperAdmin;

@@ -15,6 +15,7 @@ const ApiError = require("./utils/ApiError");
 //Routes
 const userRoutes = require('./routes/allow-box/user.routes');
 const superAdminRoutes = require('./routes/slate/superAdmin.routes');
+const emailTemplateRoutes = require('./routes/slate/emailTemplates');
 
 const app = express();
 const server = http.createServer(app);
@@ -31,10 +32,18 @@ app.use(helmet());
 app.use(express.json());
 
 // parse urlencoded request body
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, decode: decodeURIComponent }));
 
 // sanitize request data
-app.use(xss());
+app.use((req, res, next) => {
+  if (req.path === '/api/slate/email-template/create') {
+    // Skip xss() for this route
+    return next();
+  }
+  
+  // Apply xss() normally
+  xss()(req, res, next);
+});
 app.use(mongoSanitize());
 
 // gzip compression
@@ -62,6 +71,7 @@ if (config.env === "production") {
 
 app.use("/api/allow-box/user", userRoutes);
 app.use("/api/slate/super-admin", superAdminRoutes);
+app.use("/api/slate/email-template", emailTemplateRoutes);
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {

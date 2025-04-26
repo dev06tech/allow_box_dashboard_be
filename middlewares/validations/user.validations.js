@@ -3,7 +3,9 @@ const {
     registrationSchema, 
     emailVerificationSchema, 
     loginSchema,
-    updatePasswordSchema } = require('../../utils/validations/users');
+    updatePasswordSchema,
+    forgotPasswordSchema
+ } = require('../../utils/validations/users');
 
 const validateRegistration = (req, res, next) => {
     const { error } = registrationSchema.validate(req.body);
@@ -29,7 +31,7 @@ const validateLogin = (req, res, next) => {
     next();
 };
 
-const changePassword = (req, res, next) => {
+const validateChangePassword = (req, res, next) => {
     const { error } = updatePasswordSchema.validate(req.body);
     if (error) {
         return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
@@ -37,10 +39,18 @@ const changePassword = (req, res, next) => {
     next();
 };
 
+const validateForgotPassword = (req, res, next) => {
+    const { error } = forgotPasswordSchema.validate(req.body);
+    if (error) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
+    }
+    next();
+};
 
 module.exports = {
     validateRegistration,
     validateEmailVerification,
     validateLogin,
-    changePassword
+    validateChangePassword,
+    validateForgotPassword
 };

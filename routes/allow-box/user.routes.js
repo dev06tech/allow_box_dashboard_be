@@ -2,15 +2,19 @@ const { Router } = require("express");
 const { default: httpStatus } = require('http-status');
 const router = Router();
 const config = require('../../config/config');
-const { createConnection, getConnectionUrl, verifyGoogleToken } = require('../../services/google.service');
-
+const { 
+  createConnection, 
+  getConnectionUrl 
+} = require('../../services/google.service');
 
 const {
   validateRegistration,
   validateEmailVerification,
   validateLogin,
-  changePassword
+  validateChangePassword,
+  validateForgotPassword
 } = require('../../middlewares/validations/user.validations');
+
 const {
   userAuth,
   isRegisteredUser
@@ -106,13 +110,23 @@ router.post("/logout", userAuth, async (req, res, next) => {
   }
 })
 
-router.put("/change-password", changePassword, async (req, res, next) => {  
+router.put("/change-password", validateChangePassword, async (req, res, next) => {  
   const { email, oldPassWord, newPassword } = req.body;  
   try {
     const user = await userController.changePassword(email, oldPassWord, newPassword);    
     res.status(httpStatus.OK).json(user);
   }
   catch (error) {
+    next(error)
+  }
+})
+
+router.put("/forgot-password", validateForgotPassword, async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const user = await userController.forgotPassword(email);
+    res.status(httpStatus.OK).json(user);
+  } catch (error) {
     next(error)
   }
 })

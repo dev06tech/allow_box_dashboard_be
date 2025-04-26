@@ -5,10 +5,17 @@ const config = require('../../config/config');
 const { createConnection, getConnectionUrl, verifyGoogleToken } = require('../../services/google.service');
 
 
-const { validateRegistration, validateEmailVerification, validateLogin } = require('../../middlewares/validations/user.validations');
-const { 
+const {
+  validateRegistration,
+  validateEmailVerification,
+  validateLogin,
+  changePassword
+} = require('../../middlewares/validations/user.validations');
+const {
   userAuth,
-  isRegisteredUser } = require("../../middlewares/userAuth");
+  isRegisteredUser
+} = require("../../middlewares/userAuth");
+
 const userController = require("../../controllers/User.controller");
 
 router.post("/register", validateRegistration, async (req, res, next) => {
@@ -41,7 +48,7 @@ router.post("/verify-email", validateEmailVerification, isRegisteredUser, async 
   }
 })
 
-router.post("/login",validateLogin, async (req, res, next) => {
+router.post("/login", validateLogin, async (req, res, next) => {
   const { email, password } = req.body;
   if (!email) {
     return res.status(httpStatus.BAD_REQUEST).json({
@@ -92,9 +99,20 @@ router.post("/get-profile", async (req, res, next) => {
 
 router.post("/logout", userAuth, async (req, res, next) => {
   try {
-    const user = await userController.logout(req.user, req.token);
+    await userController.logout(req.user, req.token);
     res.status(httpStatus.OK).json({ status: true, message: "Logged out successfully" });
   } catch (error) {
+    next(error)
+  }
+})
+
+router.put("/change-password", changePassword, async (req, res, next) => {  
+  const { email, oldPassWord, newPassword } = req.body;  
+  try {
+    const user = await userController.changePassword(email, oldPassWord, newPassword);    
+    res.status(httpStatus.OK).json(user);
+  }
+  catch (error) {
     next(error)
   }
 })

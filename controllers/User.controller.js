@@ -35,7 +35,7 @@ const createUser = (userData) => {
         try {
             let user = new User(newUser);
             await user.save();
-           const registrationToken = await user.generateRegistrationToken();
+            const registrationToken = await user.generateRegistrationToken();
             user = user.getPublicProfile();
             resolve({ user, registrationToken });
         } catch (error) {
@@ -49,15 +49,15 @@ const verifyEmailAndOtp = (email, otp) => {
         try {
             const user = await User.findOne({ email, registrationOtp: otp });
             if (!user) {
-                return reject({ 
-                    statusCode: httpStatus.BAD_REQUEST, 
-                    message: "Invalid OTP or email provided" 
+                return reject({
+                    statusCode: httpStatus.BAD_REQUEST,
+                    message: "Invalid OTP or email provided"
                 });
             }
-            if(user.isEmailVerified) {
-                return reject({ 
-                    statusCode: httpStatus.BAD_REQUEST, 
-                    message: "Email already verified" 
+            if (user.isEmailVerified) {
+                return reject({
+                    statusCode: httpStatus.BAD_REQUEST,
+                    message: "Email already verified"
                 });
             }
             user.isEmailVerified = true;
@@ -74,9 +74,9 @@ const login = (email, password) => {
         try {
             const user = await User.findByEmailCredentials(email, password);
             if (!user.isEmailVerified) {
-                return reject({ 
+                return reject({
                     statusCode: httpStatus.FORBIDDEN,
-                    message: "Please verify your email first" 
+                    message: "Please verify your email first"
                 });
             }
             let token = await user.generateAuthToken();
@@ -124,7 +124,7 @@ const processGoogleAuth = async (code) => {
         user.isLoggedIn = true;
         await user.save();
         const authToken = await user.generateAuthToken();
-        return { user: user.getPublicProfile(), token:authToken };
+        return { user: user.getPublicProfile(), token: authToken };
 
     } catch (error) {
         logger.error(`Google auth processing error: ${error.message}`);
@@ -135,11 +135,27 @@ const processGoogleAuth = async (code) => {
     }
 };
 
+const changePassword = (email, oldPassWord, newPassword) => {    
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findByEmailCredentials(email, oldPassWord);
+            user.password = newPassword;
+            user.isLoggedIn = false;
+            user.tokens = [];
+            await user.save();
+            resolve(user.getPublicProfile());
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 
 module.exports = {
     createUser,
     verifyEmailAndOtp,
     login,
     logout,
-    processGoogleAuth
+    processGoogleAuth,
+    changePassword
 };

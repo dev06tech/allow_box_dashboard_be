@@ -36,4 +36,13 @@ router.get("/logout",superAdminAuth, async (req, res, next) => {
     next(error)
   }
 })
+
+router.put("/assign-role", superAdminAuth, async (req, res, next) => {
+  try {
+    const user = await superAdminController.assignRole(req.body);
+    res.status(httpStatus.OK).json(user);
+  } catch (error) {
+    next(error)
+  }
+})
 module.exports = router;

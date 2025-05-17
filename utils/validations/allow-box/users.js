@@ -14,7 +14,6 @@ const registrationSchema = Joi.object({
 
 const emailVerificationSchema = Joi.object({
     email: Joi.string().email().required().messages({'string.empty': 'Email is required'}),
-    otp: Joi.string().required().max(6).messages({'string.empty': 'OTP is required'}),
 }).strict();
 
 const loginSchema = Joi.object({
@@ -41,10 +40,17 @@ const forgotPasswordSchema = Joi.object({
     email: Joi.string().email().required().messages({'string.empty': 'Email is required'}),
 }).strict();
 
+const newSuperAdminSchema = Joi.object({
+    fullName: Joi.string().required().messages({'string.empty': 'Full name is required'}),
+    email: Joi.string().email().required().messages({'string.empty': 'Email is required'}),
+    schoolId: Joi.string().required().messages({ 'string.empty': 'School id is required' }),
+}).strict();
+
 module.exports = {
     registrationSchema,
     emailVerificationSchema,
     loginSchema,
     updatePasswordSchema,
-    forgotPasswordSchema
+    forgotPasswordSchema,
+    newSuperAdminSchema
 }

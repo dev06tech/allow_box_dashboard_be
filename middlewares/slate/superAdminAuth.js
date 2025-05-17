@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const SupertAdmin = require('../models/superAdmin.model');
-const config = require('../config/config');
+const SupertAdmin = require('../../models/slate/superAdmin.model');
+const config = require('../../config/config');
 const { default: httpStatus } = require('http-status');
 const { log } = require('winston');
 
@@ -13,7 +13,7 @@ const superAdminAuth = async (req, res, next) => {
         }
         try {
             const decoded = jwt.verify(token, config.jwt.secret);
-            const superAdmin = await SupertAdmin.findById(decoded._id);
+            const superAdmin = await SupertAdmin.findById(decoded._id);            
             if (!superAdmin) {
                 return res.status(httpStatus.NOT_FOUND).json({ message: 'Super Admin not found' });
             }
@@ -28,8 +28,7 @@ const superAdminAuth = async (req, res, next) => {
                     message: 'Token expired',
                     logout: true
                 });
-            }
-
+            }            
             req.superAdmin = superAdmin;
             req.token = token;            
             next();

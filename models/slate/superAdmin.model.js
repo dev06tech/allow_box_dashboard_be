@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const config = require("../config/config");
+const config = require("../../config/config");
 const { log } = require('winston');
 
 const superAdminSchema = new mongoose.Schema({

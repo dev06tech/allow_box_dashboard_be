@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user.model');
-const config = require('../config/config');
+const User = require('../../models/allow-box/user.model');
+const config = require('../../config/config');
 const { default: httpStatus } = require('http-status');
 
 const isRegisteredUser = async (req, res, next) => {
@@ -73,7 +73,6 @@ const userAuth = async (req, res, next) => {
                 errorType: 'USER_NOT_FOUND'
             });
         }
-        // Check if user is logged in
         if (!user.isLoggedIn) {
             return res.status(httpStatus.UNAUTHORIZED).json({
                 message: 'You have been logged out. Please log in again.',
@@ -81,7 +80,6 @@ const userAuth = async (req, res, next) => {
                 errorType: 'USER_LOGGED_OUT'
             });
         }
-        // Check if token exists in the user's tokens array
         const tokenExists = user.tokens.some(t => t.token === token);
         if (!tokenExists) {
             return res.status(httpStatus.UNAUTHORIZED).json({
@@ -90,8 +88,6 @@ const userAuth = async (req, res, next) => {
                 errorType: 'TOKEN_NOT_FOUND'
             });
         }
-
-        // Set user and token on request object
         req.user = user;
         req.token = token;
         next();

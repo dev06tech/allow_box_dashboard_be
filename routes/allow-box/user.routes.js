@@ -2,9 +2,9 @@ const { Router } = require("express");
 const { default: httpStatus } = require('http-status');
 const router = Router();
 const config = require('../../config/config');
-const { 
-  createConnection, 
-  getConnectionUrl 
+const {
+  createConnection,
+  getConnectionUrl
 } = require('../../services/google.service');
 
 const {
@@ -12,15 +12,19 @@ const {
   validateEmailVerification,
   validateLogin,
   validateChangePassword,
-  validateForgotPassword
-} = require('../../middlewares/validations/user.validations');
+  validateForgotPassword,
+  validateNewSuperAdmin
+} = require('../../middlewares/validations/allow-box/user.validations');
+
 
 const {
   userAuth,
   isRegisteredUser
-} = require("../../middlewares/userAuth");
+} = require("../../middlewares/allow-box/userAuth");
 
-const userController = require("../../controllers/User.controller");
+const { superAdminAuth } = require("../../middlewares/allow-box/superAdminAuth");
+
+const userController = require("../../controllers/allow-box/User.controller");
 
 router.post("/register", validateRegistration, async (req, res, next) => {
   const { fullName, email, password } = req.body;
@@ -33,19 +37,14 @@ router.post("/register", validateRegistration, async (req, res, next) => {
 })
 
 router.post("/verify-email", validateEmailVerification, isRegisteredUser, async (req, res, next) => {
-  const { email, otp } = req.body;
-  if (!otp) {
-    return res.status(httpStatus.BAD_REQUEST).json({
-      message: "Please Provide OTP"
-    });
-  }
+  const { email } = req.body;
   if (!email) {
     return res.status(httpStatus.BAD_REQUEST).json({
       message: "Please Provide Email"
     });
   }
   try {
-    const user = await userController.verifyEmailAndOtp(email, otp);
+    const user = await userController.verifyEmailAndOtp(email);
     res.status(httpStatus.OK).json(user);
   } catch (error) {
     next(error)
@@ -110,10 +109,10 @@ router.post("/logout", userAuth, async (req, res, next) => {
   }
 })
 
-router.put("/change-password", validateChangePassword, async (req, res, next) => {  
-  const { email, oldPassWord, newPassword } = req.body;  
+router.put("/change-password", validateChangePassword, async (req, res, next) => {
+  const { email, oldPassWord, newPassword } = req.body;
   try {
-    const user = await userController.changePassword(email, oldPassWord, newPassword);    
+    const user = await userController.changePassword(email, oldPassWord, newPassword);
     res.status(httpStatus.OK).json(user);
   }
   catch (error) {
@@ -125,6 +124,17 @@ router.put("/forgot-password", validateForgotPassword, async (req, res, next) =>
   const { email } = req.body;
   try {
     const user = await userController.forgotPassword(email);
+    res.status(httpStatus.OK).json(user);
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post("/add-new-super-admin/:schoolId", validateNewSuperAdmin, superAdminAuth, async (req, res, next) => {
+  const schoolId = req.params.schoolId;
+  const userData = req.body;
+  try {
+    const user = await userController.addNewSuperAdmin(userData, schoolId);
     res.status(httpStatus.OK).json(user);
   } catch (error) {
     next(error)

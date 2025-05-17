@@ -1,4 +1,4 @@
-const EmailTemplate = require("../models/emailTempate.model");
+const EmailTemplate = require("../../models/slate/emailTempate.model");
 const { default: httpStatus } = require("http-status");
 
 const create = async (data) => {

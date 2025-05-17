@@ -1,6 +1,6 @@
 const {
     emailTemplateSchema
-} = require('../../utils/validations/emailTemplates');
+} = require('../../../utils/validations/slate/emailTemplates');
 
 const validateEmailTemplate = (req, res, next) => {
     const { error } = emailTemplateSchema.validate(req.body);

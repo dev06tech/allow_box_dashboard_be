@@ -20,6 +20,9 @@ const envVarsSchema = Joi.object()
         GOOGLE_CLIENT_ID: Joi.string().required().description("Google client ID"),
         GOOGLE_CLIENT_SECRET: Joi.string().required().description("Google client secret"),
         GOOGLE_REDIRECT_URI: Joi.string().required().description("Google redirect URI"),
+        MAIL_SENDER_API_KEY: Joi.string().required().description("Mail sender api key"),
+        MAIL_SENDER_FROM_EMAIL: Joi.string().email().required().description("Mail sender from email"),
+        MAIL_SENDER_FROM_NAME: Joi.string().required().description("Mail sender from name")
 
     })
     .unknown();
@@ -55,5 +58,9 @@ module.exports = {
         clientSecret: envVars.GOOGLE_CLIENT_SECRET,
         redirectUri: envVars.GOOGLE_REDIRECT_URI,
     },
-
+    mailSender: {
+        apiKey: envVars.MAIL_SENDER_API_KEY,
+        fromEmail: envVars.MAIL_SENDER_FROM_EMAIL,
+        fromName: envVars.MAIL_SENDER_FROM_NAME
+    }
 };

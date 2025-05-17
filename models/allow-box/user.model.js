@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const config = require("../config/config");
+const config = require("../../config/config");
 const { default: httpStatus } = require("http-status");
 
 const userSchema = new mongoose.Schema({
@@ -39,11 +39,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ["admin", "school-admin", "teacher", "student", "parent"],
-        default: null,
-    },
-    registrationOtp: {
-        type: String,
+        enum: ["super-admin", "teacher", "student", "parent", "support"],
         default: null,
     },
     isEmailVerified: {
@@ -64,7 +60,7 @@ const userSchema = new mongoose.Schema({
     },
     registeredVia: {
         type: String,
-        enum: ["email", "google", "facebook"],
+        enum: ["email", "google", "slate"],
         default: "email",
     },
     passworResetToken: {

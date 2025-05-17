@@ -1,10 +1,11 @@
-const config = require("../config/config")
-const logger = require("../config/logger")
-const User = require("../models/user.model")
-const EmailTemplate = require("../models/emailTempate.model")
-const googleAuthService = require("../services/google.service")
+const config = require("../../config/config")
+const logger = require("../../config/logger")
+const User = require("../../models/allow-box/user.model")
+const EmailTemplate = require("../../models/slate/emailTempate.model")
+const googleAuthService = require("../../services/google.service")
 const { default: httpStatus } = require("http-status")
 const crypto = require("crypto")
+const {getSchoolByIdAndAddSuperAdmin} = require("../../controllers/allow-box/School.controller")
 
 
 // const checkIsSuperAdminEmail = (email) => {
@@ -26,12 +27,10 @@ const generateOTP = () => {
 
 const createUser = (userData) => {
     const { fullName, email, password } = userData;
-    const registrationOtp = generateOTP();
     const newUser = {
         fullName,
         email,
         password,
-        registrationOtp,
     };
     return new Promise(async (resolve, reject) => {
         try {
@@ -46,10 +45,23 @@ const createUser = (userData) => {
     })
 }
 
+const createSchoolSuperAdmin = (fullName, email) => {
+    const password = crypto.randomBytes(16).toString('hex') + 'Aa1!';
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = new User({ fullName, email, password });
+            await user.save();
+            resolve({ user: superAdmin.getPublicProfile() });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 const verifyEmailAndOtp = (email, otp) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findOne({ email, registrationOtp: otp });
+            const user = await User.findOne({ email });
             if (!user) {
                 return reject({
                     statusCode: httpStatus.BAD_REQUEST,
@@ -137,7 +149,7 @@ const processGoogleAuth = async (code) => {
     }
 };
 
-const changePassword = (email, oldPassWord, newPassword) => {    
+const changePassword = (email, oldPassWord, newPassword) => {
     return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findByEmailCredentials(email, oldPassWord);
@@ -151,7 +163,6 @@ const changePassword = (email, oldPassWord, newPassword) => {
         }
     })
 }
-
 const forgotPassword = (email) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -169,7 +180,7 @@ const forgotPassword = (email) => {
                 emailContent = emailTemplate.emailContent.replace("{{passwordResetToken}}",
                     `<a href="${config.frontend}/password-reset/${passwordResetToken}">${config.frontend}/password-reset/${passwordResetToken}</a>`
                 );
-                emailTemplate.emailContent = emailContent;                
+                emailTemplate.emailContent = emailContent;
             }
             resolve({ user: user.getPublicProfile(), emailTemplate });
         } catch (error) {
@@ -177,12 +188,34 @@ const forgotPassword = (email) => {
         }
     })
 }
+
+const addNewSuperAdmin = (userData, schoolId,sendEmail = false) => {
+    return new Promise(async (resolve, reject) => {
+        const password = crypto.randomBytes(16).toString('hex') + 'Aa1!';
+        userData.password = password;
+        try {
+            const user = new User(userData);
+            await user.save();
+            const registrationToken = await user.generateRegistrationToken();
+            if (sendEmail) {
+                await emailerService.sendEmailVerificationEmail(user.email, user.fullName, 'Verify Your Email', registrationToken);
+            }
+            const school = await getSchoolByIdAndAddSuperAdmin(schoolId, user._id);
+            resolve({ user: user.getPublicProfile(), registrationToken, school });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 module.exports = {
     createUser,
+    createSchoolSuperAdmin,
     verifyEmailAndOtp,
     login,
     logout,
     processGoogleAuth,
     changePassword,
-    forgotPassword
+    forgotPassword,
+    addNewSuperAdmin
 };

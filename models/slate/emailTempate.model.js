@@ -1,20 +1,19 @@
 const mongoose = require("mongoose");
-const { create } = require("./user.model");
 
 var emailTemplateSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
     enum: [
-      "verify-account",
+      "verify-email",
       "reset-password",
       "password-changed",
       "new-super-admin",
-      "new-admin",
-      "new-school-admin",
+      "new-super-admin",
       "new-teacher",
       "new-student",
-      "new-parent"
+      "new-parent",
+      "new-support"
     ],
   },
   email: {

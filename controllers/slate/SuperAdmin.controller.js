@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { default: httpStatus } = require("http-status");
-const SuperAdmin = require("../models/superAdmin.model");
-const User = require("../models/user.model");
+const SuperAdmin = require("../../models/slate/superAdmin.model");
+const User = require("../../models/allow-box/user.model");
 const checkIsSuperAdminEmail = (email) => {    
     const superAdmins = ["jranjan2017@gmail.com", "giri943@gmail.com"]
     if (superAdmins.includes(email)) {

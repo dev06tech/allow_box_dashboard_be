@@ -4,11 +4,20 @@ const {
     emailVerificationSchema, 
     loginSchema,
     updatePasswordSchema,
-    forgotPasswordSchema
- } = require('../../utils/validations/users');
+    forgotPasswordSchema,
+    schoolRegistrationSchema
+ } = require('../../../utils/validations/slate/users');
 
 const validateRegistration = (req, res, next) => {
     const { error } = registrationSchema.validate(req.body);
+    if (error) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
+    }
+    next();
+};
+
+const validateSchoolRegistration = (req, res, next) => {
+    const { error } = schoolRegistrationSchema.validate(req.body);
     if (error) {
         return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
     }
@@ -52,5 +61,6 @@ module.exports = {
     validateEmailVerification,
     validateLogin,
     validateChangePassword,
-    validateForgotPassword
+    validateForgotPassword,
+    validateSchoolRegistration
 };

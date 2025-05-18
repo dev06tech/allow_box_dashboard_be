@@ -44,8 +44,18 @@ router.post("/verify-email", validateEmailVerification, isRegisteredUser, async 
     });
   }
   try {
-    const user = await userController.verifyEmailAndOtp(email);
+    const user = await userController.verifyEmail(email);
     res.status(httpStatus.OK).json(user);
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post("/resend-verification-email", validateEmailVerification, async (req, res, next) => {
+  const { email } = req.body;  
+  try {
+    await userController.resendVerificationEmail(email);
+    res.status(httpStatus.OK).send()
   } catch (error) {
     next(error)
   }

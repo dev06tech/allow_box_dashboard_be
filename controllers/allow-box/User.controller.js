@@ -58,7 +58,7 @@ const createSchoolSuperAdmin = (fullName, email) => {
     })
 }
 
-const verifyEmailAndOtp = (email, otp) => {
+const verifyEmail = (email) => {
     return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findOne({ email });
@@ -77,6 +77,32 @@ const verifyEmailAndOtp = (email, otp) => {
             user.isEmailVerified = true;
             await user.save();
             resolve(user.getPublicProfile());
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+const resendVerificationEmail = (email) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findOne({ email });
+            if (!user) {
+                return reject({
+                    statusCode: httpStatus.BAD_REQUEST,
+                    message: "User not found"
+                });
+            }
+            if (user.isEmailVerified) {
+                return reject({
+                    statusCode: httpStatus.BAD_REQUEST,
+                    message: "Email already verified"
+                });
+            }
+            const registrationToken = await user.generateRegistrationToken();
+            user.registrationToken = registrationToken
+            await emailService.triggerEmail('re-verify-email', user, 'Verify Your Email');
+            resolve();
         } catch (error) {
             reject(error);
         }
@@ -192,10 +218,11 @@ const forgotPassword = (email) => {
 module.exports = {
     createUser,
     createSchoolSuperAdmin,
-    verifyEmailAndOtp,
+    verifyEmail,
     login,
     logout,
     processGoogleAuth,
     changePassword,
     forgotPassword,
+    resendVerificationEmail
 };

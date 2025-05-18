@@ -31,7 +31,9 @@ const isRegisteredUser = async (req, res, next) => {
             await user.save();
             return res.status(httpStatus.BAD_REQUEST).json({ message: 'User already logged in' });
         }
-
+        if(user.isBlocked){
+            return res.status(httpStatus.UNAUTHORIZED).json({ message: 'User blocked' });
+        }
         req.user = user;
         req.token = token;
         next();
@@ -84,6 +86,9 @@ const userAuth = async (req, res, next) => {
             await user.save();
             return res.status(httpStatus.BAD_REQUEST).json({ message: 'User not logged in, Please login' });
         }
+        if(user.isBlocked){
+            return res.status(httpStatus.UNAUTHORIZED).json({ message: 'User blocked' });
+        }
         req.user = user;
         req.token = token;
         next();
@@ -130,6 +135,9 @@ const resetPasswordAuth = async (req, res, next) => {
         }
         if(!user.isEmailVerified){
             return res.status(httpStatus.BAD_REQUEST).json({ message: 'Email not verified, Please verify your email' });
+        }
+        if(user.isBlocked){
+            return res.status(httpStatus.UNAUTHORIZED).json({ message: 'User blocked' });
         }
         req.user = user;
         req.token = token;

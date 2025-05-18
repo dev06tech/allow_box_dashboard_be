@@ -127,10 +127,10 @@ const login = (email, password) => {
     })
 }
 
-const logout = (user, token) => {
+const logout = (user) => {
     return new Promise(async (resolve, reject) => {
         try {
-            user.tokens = user.tokens.filter((t) => t.token !== token);
+            user.tokens = []
             user.isLoggedIn = false;
             await user.save();
             resolve(user.getPublicProfile());
@@ -175,14 +175,15 @@ const processGoogleAuth = async (code) => {
     }
 };
 
-const changePassword = (email, oldPassWord, newPassword) => {
+const changePassword = (newPassword, user) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findByEmailCredentials(email, oldPassWord);
             user.password = newPassword;
             user.isLoggedIn = false;
             user.tokens = [];
             await user.save();
+            user.password = newPassword;
+            await emailService.triggerEmail('password-changed', user, 'Password Changed');
             resolve(user.getPublicProfile());
         } catch (error) {
             reject(error);
@@ -200,14 +201,8 @@ const forgotPassword = (email) => {
                 });
             }
             const passwordResetToken = await user.generatePasswordResetToken();
-            const emailTemplate = await EmailTemplate.findOne({ type: "reset-password" });
-            if (emailTemplate && emailTemplate.emailContent) {
-                let emailContent = emailTemplate.emailContent;
-                emailContent = emailTemplate.emailContent.replace("{{passwordResetToken}}",
-                    `<a href="${config.frontend}/password-reset/${passwordResetToken}">${config.frontend}/password-reset/${passwordResetToken}</a>`
-                );
-                emailTemplate.emailContent = emailContent;
-            }
+            user.passwordResetToken = passwordResetToken;
+            await emailService.triggerEmail('re-verify-email', user, 'Verify Your Email');
             resolve({ user: user.getPublicProfile(), emailTemplate });
         } catch (error) {
             reject(error);

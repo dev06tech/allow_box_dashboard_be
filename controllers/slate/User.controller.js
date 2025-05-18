@@ -8,7 +8,7 @@ const generateOTP = () => {
     const max = 999999;
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-const createSchoolSuperAdmin = (userData, sendEmail = config.nodeMailer.activeStatus) => {
+const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
     const password = config.nodeEnvironment === 'development'
         ? 'Admin@123'
         : crypto.randomBytes(16).toString('hex') + 'Aa1!';
@@ -21,7 +21,10 @@ const createSchoolSuperAdmin = (userData, sendEmail = config.nodeMailer.activeSt
             user.registrationToken = registrationToken
             user.password = password
             if (sendEmail) {
-                await emailerService.triggerEmail('verify-email', user, 'Verify Your Email');
+                emailerService.triggerEmail('verify-email', user, 'Verify Your Email')
+                .catch((err) => {
+                    console.error('Failed to send verification email:', err.message);
+                })
             }
             resolve({ user: user.getPublicProfile(), registrationToken });
         } catch (error) {
@@ -29,7 +32,18 @@ const createSchoolSuperAdmin = (userData, sendEmail = config.nodeMailer.activeSt
         }
     })
 }
+const updateUser = (userUpdates) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const updatedUser = await User.findOneAndUpdate({ _id: userUpdates._id }, userUpdates, { new: true });
+            resolve(updatedUser);
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
 
 module.exports = {
-    createSchoolSuperAdmin
+    createUser,
+    updateUser
 }

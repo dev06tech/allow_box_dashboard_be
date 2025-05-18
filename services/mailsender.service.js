@@ -60,6 +60,19 @@ const triggerEmail = async (templateType, userData, subject) => {
         }
 
     }
+    if (templateType === 'reset-password') {
+        const emailTemplate = await emailTeamplateController.getEmailTemplate(templateType);
+        if (emailTemplate && emailTemplate.emailContent) {
+            emailContent = emailTemplate.emailContent;
+            emailContent = emailContent.replace("{{passwordResetToken}}",
+                `<a href="${config.frontend}/reset-password/${userData.passwordResetToken}">${config.frontend}/reset-password/${userData.passwordResetToken}</a>`
+            );
+        }
+        else {
+            throw new Error(`Email template ${templateType} not found.`);
+        }
+
+    }
     const mailOptions = {
         from: config.nodeMailer.fromEmail,
         to: userData.email,

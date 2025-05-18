@@ -73,7 +73,10 @@ const userSchema = new mongoose.Schema({
             },
         },
     ],
-
+    associatedSchool: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "School"
+    }
 });
 
 userSchema.methods.generateRegistrationToken = async function () {

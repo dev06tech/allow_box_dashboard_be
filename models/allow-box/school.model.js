@@ -22,38 +22,6 @@ const schoolSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        schoolSuperAdmins: [
-            {//staff with super admin access
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User",
-                required: true,
-            }
-        ],
-        schoolAdmins: [
-            { //staffs who has admin access
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User",
-            },
-        ],
-        schoolSupportStaffs: [
-            { //technical support
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User",
-            },
-        ],
-        schoolClasses: [
-            //classes under the school
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Class",
-            },
-        ],
-        schoolTeachers: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User",
-            },
-        ],
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "SuperAdmin",

@@ -62,5 +62,6 @@ module.exports = {
         apiKey: envVars.MAIL_SENDER_API_KEY,
         fromEmail: envVars.MAIL_SENDER_FROM_EMAIL,
         fromName: envVars.MAIL_SENDER_FROM_NAME
-    }
+    },
+    nodeEnvironment: envVars.NODE_ENV
 };

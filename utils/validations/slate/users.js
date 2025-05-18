@@ -9,9 +9,10 @@ const schoolRegistrationSchema = Joi.object({
         phone: Joi.string().required().messages({ 'string.empty': 'Phone number is required' }),
         address: Joi.string().required().messages({ 'string.empty': 'Address is required' }),
     }).required(),
-    adminData: Joi.object({
+    userData: Joi.object({
         email: Joi.string().email().required().messages({ 'string.empty': 'Admin email is required', 'string.email': 'Admin email must be valid' }),
         fullName: Joi.string().required().messages({ 'string.empty': 'Admin full name is required' }),
+        role: Joi.string().valid("super-admin", "teacher", "student", "parent", "support").required().messages({ 'string.empty': 'Admin role is required' }),
     }).required()
 }).strict();
 

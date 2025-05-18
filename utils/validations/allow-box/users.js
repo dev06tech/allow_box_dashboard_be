@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const httpStatus = require('http-status');
+const { assignRole } = require('../../../controllers/slate/SuperAdmin.controller');
 
 // Registration schema
 const registrationSchema = Joi.object({
@@ -40,10 +41,11 @@ const forgotPasswordSchema = Joi.object({
     email: Joi.string().email().required().messages({'string.empty': 'Email is required'}),
 }).strict();
 
-const newSuperAdminSchema = Joi.object({
+const newUserchema = Joi.object({
     fullName: Joi.string().required().messages({'string.empty': 'Full name is required'}),
     email: Joi.string().email().required().messages({'string.empty': 'Email is required'}),
-    schoolId: Joi.string().required().messages({ 'string.empty': 'School id is required' }),
+    role: Joi.string().valid("super-admin", "teacher", "student", "parent", "support").required().messages({ 'string.empty': 'Admin role is required' }),
+    associatedSchool: Joi.string().required().messages({ 'string.empty': 'School id is required' }),
 }).strict();
 
 module.exports = {
@@ -52,5 +54,5 @@ module.exports = {
     loginSchema,
     updatePasswordSchema,
     forgotPasswordSchema,
-    newSuperAdminSchema
+    newUserchema
 }

@@ -24,11 +24,12 @@ router.post("/register", validateRegistration, async (req, res, next) => {
 })
 
 router.post("/register-school-user", validateSchoolRegistration, superAdminAuth, async (req, res, next) => {
-    const { schoolData, adminData } = req.body;
+    const { schoolData, userData } = req.body;
     schoolData.createdBy = req.superAdmin._id;
     try {
-        const createdUser = await slateUserController.createSchoolSuperAdmin(adminData);
-        const createdSchool = await allowBoxSchoolController.createAllowBoxSchool(schoolData, createdUser.user._id);
+        const createdSchool = await allowBoxSchoolController.createAllowBoxSchool(schoolData);
+        userData.associatedSchool = createdSchool._id;
+        const createdUser = await slateUserController.createSchoolSuperAdmin(userData);
         res.status(httpStatus.CREATED).json({
             user: createdUser,
             school: createdSchool

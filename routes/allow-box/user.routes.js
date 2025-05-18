@@ -13,7 +13,7 @@ const {
   validateLogin,
   validateChangePassword,
   validateForgotPassword,
-  validateNewSuperAdmin
+  validateNewUser
 } = require('../../middlewares/validations/allow-box/user.validations');
 
 
@@ -130,11 +130,10 @@ router.put("/forgot-password", validateForgotPassword, async (req, res, next) =>
   }
 })
 
-router.post("/add-new-super-admin/:schoolId", validateNewSuperAdmin, superAdminAuth, async (req, res, next) => {
-  const schoolId = req.params.schoolId;
+router.post("/add-new-user", validateNewUser, superAdminAuth, async (req, res, next) => {
   const userData = req.body;
   try {
-    const user = await userController.addNewSuperAdmin(userData, schoolId);
+    const user = await userController.createUser(userData);
     res.status(httpStatus.OK).json(user);
   } catch (error) {
     next(error)

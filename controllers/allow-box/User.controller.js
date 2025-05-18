@@ -5,7 +5,7 @@ const EmailTemplate = require("../../models/slate/emailTempate.model")
 const googleAuthService = require("../../services/google.service")
 const { default: httpStatus } = require("http-status")
 const crypto = require("crypto")
-const {getSchoolByIdAndAddSuperAdmin} = require("../../controllers/allow-box/School.controller")
+const { getSchoolByIdAndAddSuperAdmin } = require("../../controllers/allow-box/School.controller")
 
 
 // const checkIsSuperAdminEmail = (email) => {
@@ -24,21 +24,19 @@ const generateOTP = () => {
     const max = 999999;
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
-const createUser = (userData) => {
-    const { fullName, email, password } = userData;
-    const newUser = {
-        fullName,
-        email,
-        password,
-    };
+const createUser = (userData, sendEmail = false) => {
     return new Promise(async (resolve, reject) => {
+        const password = config.nodeEnvironment === 'development'
+            ? 'Admin@123'
+            : crypto.randomBytes(16).toString('hex') + 'Aa1!'; userData.password = password;
         try {
-            let user = new User(newUser);
+            const user = new User(userData);
             await user.save();
             const registrationToken = await user.generateRegistrationToken();
-            user = user.getPublicProfile();
-            resolve({ user, registrationToken });
+            if (sendEmail) {
+                await emailerService.sendEmailVerificationEmail(user.email, user.fullName, 'Verify Your Email', registrationToken);
+            }
+            resolve({ user: user.getPublicProfile(), registrationToken });
         } catch (error) {
             reject(error);
         }
@@ -189,25 +187,6 @@ const forgotPassword = (email) => {
     })
 }
 
-const addNewSuperAdmin = (userData, schoolId,sendEmail = false) => {
-    return new Promise(async (resolve, reject) => {
-        const password = crypto.randomBytes(16).toString('hex') + 'Aa1!';
-        userData.password = password;
-        try {
-            const user = new User(userData);
-            await user.save();
-            const registrationToken = await user.generateRegistrationToken();
-            if (sendEmail) {
-                await emailerService.sendEmailVerificationEmail(user.email, user.fullName, 'Verify Your Email', registrationToken);
-            }
-            const school = await getSchoolByIdAndAddSuperAdmin(schoolId, user._id);
-            resolve({ user: user.getPublicProfile(), registrationToken, school });
-        } catch (error) {
-            reject(error);
-        }
-    })
-}
-
 module.exports = {
     createUser,
     createSchoolSuperAdmin,
@@ -217,5 +196,4 @@ module.exports = {
     processGoogleAuth,
     changePassword,
     forgotPassword,
-    addNewSuperAdmin
 };

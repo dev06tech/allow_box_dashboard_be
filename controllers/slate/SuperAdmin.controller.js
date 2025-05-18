@@ -49,7 +49,7 @@ const logout = (superAdmin, token) => {
     return new Promise(async (resolve, reject) => {
         try {
             
-            superAdmin.tokens = superAdmin.tokens.filter((t) => t.token !== token);
+            superAdmin.tokens = []
             superAdmin.isLoggedIn = false;
             await superAdmin.save();
             resolve({ status: true, message: "Logged out successfully" });

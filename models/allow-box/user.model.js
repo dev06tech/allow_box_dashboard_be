@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema({
     },
     registeredVia: {
         type: String,
-        enum: ["email", "google", "slate"],
+        enum: ["email", "google", "slate", "allow-box"],
         default: "email",
     },
     passworResetToken: {
@@ -76,6 +76,10 @@ const userSchema = new mongoose.Schema({
     associatedSchool: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "School"
+    },
+    isBlocked: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -94,6 +98,8 @@ userSchema.methods.generatePasswordResetToken = async function () {
     const token = jwt.sign({ _id: user._id.toString() }, config.jwt.secret, {
         expiresIn: config.jwt.expiry,
     });
+    user.isLoggedIn = false;
+    user.tokens = [];
     user.passworResetToken = token;
     await user.save();
     return token;
@@ -144,6 +150,23 @@ userSchema.pre("save", async function (next) {
     if (user.isModified("password")) {
         user.password = await bcrypt.hash(user.password, 8);
     }
+    next();
+});
+
+userSchema.pre('findOneAndUpdate', async function (next) {
+    const update = this.getUpdate();
+
+    if (update && typeof update === 'object' && !Array.isArray(update)) {
+        if (update.password) {
+            const hashed = await bcrypt.hash(update.password, 8);
+            update.password = hashed;
+            update.tokens = [];
+            update.isLoggedIn = false;
+
+            this.setUpdate(update);
+        }
+    }
+
     next();
 });
 

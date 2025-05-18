@@ -3,7 +3,10 @@ const { default: httpStatus } = require('http-status');
 const router = Router();
 const config = require('../../config/config');
 
-const { validateSchoolRegistration, validateRegistration, validateLogin } = require('../../middlewares/validations/slate/user.validations');
+const { validateSchoolRegistration, 
+  validateRegistration, 
+  validateLogin,
+  validateUserUpdate } = require('../../middlewares/validations/slate/user.validations');
 
 const { superAdminAuth } = require("../../middlewares/slate/superAdminAuth");
 
@@ -27,9 +30,9 @@ router.post("/register-school-user", validateSchoolRegistration, superAdminAuth,
     const { schoolData, userData } = req.body;
     schoolData.createdBy = req.superAdmin._id;
     try {
-        const createdSchool = await allowBoxSchoolController.createAllowBoxSchool(schoolData);
+        const createdSchool = await allowBoxSchoolController.createSchool(schoolData);
         userData.associatedSchool = createdSchool._id;
-        const createdUser = await slateUserController.createSchoolSuperAdmin(userData);
+        const createdUser = await slateUserController.createUser(userData);
         res.status(httpStatus.CREATED).json({
             user: createdUser,
             school: createdSchool
@@ -66,5 +69,14 @@ router.put("/assign-role", superAdminAuth, async (req, res, next) => {
     } catch (error) {
         next(error)
     }
+})
+
+router.put("/update-user", validateUserUpdate, superAdminAuth, async (req, res, next) => {
+  try {
+    const user = await slateUserController.updateUser(req.body);
+    res.status(httpStatus.OK).json(user);
+  } catch (error) {
+    next(error)
+  }
 })
 module.exports = router;

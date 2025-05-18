@@ -1,7 +1,7 @@
 
 const School = require('../../models/allow-box/school.model');
 
-const createAllowBoxSchool = (schoolData) => {
+const createSchool = (schoolData) => {
     return new Promise(async (resolve, reject) => {
         try {
             const school = new School(schoolData);
@@ -14,5 +14,5 @@ const createAllowBoxSchool = (schoolData) => {
 }
 
 module.exports = {
-    createAllowBoxSchool
+    createSchool
 }

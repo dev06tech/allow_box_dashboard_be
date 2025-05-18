@@ -11,58 +11,53 @@ const superAdminAuth = async (req, res, next) => {
                 message: 'Authentication required. Please provide a valid Bearer token.'
             });
         }
-        const token = authHeader.replace('Bearer ', '');
-        let decoded;
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        if (!token) {
+            return res.status(httpStatus.UNAUTHORIZED).json({ message: 'No token provided' });
+        }
         try {
-            decoded = jwt.verify(token, config.jwt.secret);
+            // Verify token
+            const decoded = jwt.verify(token, config.jwt.secret);
+            const user = await User.findById(decoded._id);
+            if (!user) {
+                return res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
+            }
+            if (!user.isEmailVerified) {
+                return res.status(httpStatus.BAD_REQUEST).json({ message: 'Email not verified, Please verify your email' });
+            }
+            if (!user.isLoggedIn) {
+                user.tokens = []
+                await user.save();
+                return res.status(httpStatus.BAD_REQUEST).json({ message: 'User not logged in, Please login' });
+            }
+            if (!user.role !== 'super-admin') {
+                return res.status(httpStatus.UNAUTHORIZED).json({ message: 'You are not a super admin' });
+            }
+            req.user = user;
+            req.token = token;
+            next();
         } catch (error) {
             if (error.name === 'TokenExpiredError') {
+                const decoded = jwt.decode(token); // decode without verifying
+                const user = await User.findById(decoded?._id);
+
+                if (user) {
+                    user.passworResetToken = null
+                    user.tokens = []
+                    user.isLoggedIn = false;
+                    await user.save();
+                }
+
                 return res.status(httpStatus.UNAUTHORIZED).json({
-                    message: 'Your session has expired. Please log in again.',
-                    logout: true,
-                    errorType: 'TOKEN_EXPIRED'
+                    message: 'Token expired',
+                    logout: true
                 });
             }
             return res.status(httpStatus.UNAUTHORIZED).json({
-                message: 'Invalid authentication token.',
-                logout: true,
-                errorType: 'TOKEN_INVALID'
+                message: 'Invalid token',
+                logout: true
             });
         }
-        const user = await User.findById(decoded._id).select('+tokens +isLoggedIn, +isEmailVerified');
-        if (!user) {
-            return res.status(httpStatus.NOT_FOUND).json({
-                message: 'User account not found or has been deleted.',
-                logout: true,
-                errorType: 'USER_NOT_FOUND'
-            });
-        }
-        if (!user.isLoggedIn) {
-            return res.status(httpStatus.UNAUTHORIZED).json({
-                message: 'You have been logged out. Please log in again.',
-                logout: true,
-                errorType: 'USER_LOGGED_OUT'
-            });
-        }
-        const tokenExists = user.tokens.some(t => t.token === token);
-        if (!tokenExists) {
-            return res.status(httpStatus.UNAUTHORIZED).json({
-                message: 'Session is no longer valid. Please log in again.',
-                logout: true,
-                errorType: 'TOKEN_NOT_FOUND'
-            });
-        }
-        if(user.role !== 'super-admin') {
-            return res.status(httpStatus.UNAUTHORIZED).json({
-                message: 'You are not authorized to access this resource.',
-                logout: true,
-                errorType: 'UNAUTHORIZED_ACCESS'
-            });
-        }
-        req.user = user;
-        req.token = token;
-        next();
-
     } catch (error) {
         console.error('Authentication middleware error:', error);
         res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
@@ -73,5 +68,5 @@ const superAdminAuth = async (req, res, next) => {
 };
 
 module.exports = {
-  superAdminAuth
+    superAdminAuth
 };

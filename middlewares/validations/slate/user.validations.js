@@ -1,11 +1,9 @@
 const {default:httpStatus} = require('http-status');
 const { 
     registrationSchema, 
-    emailVerificationSchema, 
     loginSchema,
-    updatePasswordSchema,
-    forgotPasswordSchema,
-    schoolRegistrationSchema
+    schoolRegistrationSchema,
+    userUpdateSchema
  } = require('../../../utils/validations/slate/users');
 
 const validateRegistration = (req, res, next) => {
@@ -24,14 +22,6 @@ const validateSchoolRegistration = (req, res, next) => {
     next();
 };
 
-const validateEmailVerification = (req, res, next) => {
-    const { error } = emailVerificationSchema.validate(req.body);
-    if (error) {
-        return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
-    }
-    next();
-};
-
 const validateLogin = (req, res, next) => {
     const { error } = loginSchema.validate(req.body);
     if (error) {
@@ -40,16 +30,8 @@ const validateLogin = (req, res, next) => {
     next();
 };
 
-const validateChangePassword = (req, res, next) => {
-    const { error } = updatePasswordSchema.validate(req.body);
-    if (error) {
-        return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
-    }
-    next();
-};
-
-const validateForgotPassword = (req, res, next) => {
-    const { error } = forgotPasswordSchema.validate(req.body);
+const validateUserUpdate = (req, res, next) => {
+    const { error } = userUpdateSchema.validate(req.body);
     if (error) {
         return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
     }
@@ -58,9 +40,7 @@ const validateForgotPassword = (req, res, next) => {
 
 module.exports = {
     validateRegistration,
-    validateEmailVerification,
     validateLogin,
-    validateChangePassword,
-    validateForgotPassword,
-    validateSchoolRegistration
+    validateSchoolRegistration,
+    validateUserUpdate
 };

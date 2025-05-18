@@ -4,7 +4,7 @@ const {
     emailVerificationSchema,
     loginSchema,
     updatePasswordSchema,
-    forgotPasswordSchema,
+    resetPasswordSchema,
     newUserchema
 } = require('../../../utils/validations/allow-box/users');
 
@@ -40,8 +40,8 @@ const validateChangePassword = (req, res, next) => {
     next();
 };
 
-const validateForgotPassword = (req, res, next) => {
-    const { error } = forgotPasswordSchema.validate(req.body);
+const validateResetPassword = (req, res, next) => {
+    const { error } = resetPasswordSchema.validate(req.body);
     if (error) {
         return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
     }
@@ -62,6 +62,6 @@ module.exports = {
     validateEmailVerification,
     validateLogin,
     validateChangePassword,
-    validateForgotPassword,
+    validateResetPassword,
     validateNewUser
 };

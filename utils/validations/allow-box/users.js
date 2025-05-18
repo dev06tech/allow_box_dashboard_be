@@ -24,7 +24,7 @@ const loginSchema = Joi.object({
 
 const updatePasswordSchema = Joi.object({
     email: Joi.string().email().required().messages({'string.empty': 'Email is required'}),
-    oldPassWord: Joi.string().min(8).required().messages({'string.empty': 'Old password is required'}),
+    oldPassWord: Joi.string().min(8).messages({'string.empty': 'Old password is required'}),
     newPassword: Joi.string().min(8).required()
         .invalid(Joi.ref('oldPassWord'))
         .messages({
@@ -37,7 +37,7 @@ const updatePasswordSchema = Joi.object({
     })
 }).strict();
 
-const forgotPasswordSchema = Joi.object({
+const resetPasswordSchema = Joi.object({
     email: Joi.string().email().required().messages({'string.empty': 'Email is required'}),
 }).strict();
 
@@ -53,6 +53,6 @@ module.exports = {
     emailVerificationSchema,
     loginSchema,
     updatePasswordSchema,
-    forgotPasswordSchema,
+    resetPasswordSchema,
     newUserchema
 }

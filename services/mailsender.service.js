@@ -1,47 +1,56 @@
 // utils/mailer.js
+const nodemailer = require('nodemailer');
 
-const { MailerSend, EmailParams } = require('mailersend');
 const config = require('../config/config');
 
 const emailTeamplateController = require('../controllers/slate/EmailTemplate.controller');
+const logger = require('../config/logger');
+const { log } = require('winston');
 
-const mailerSend = new MailerSend({
-    api_key: "mlsn.1ba3d395bdd07833f1b5ca00f9f6f86ef16e89bbe1cba407f37673a0164b414b",
+const transporter = nodemailer.createTransport({
+    host: config.nodeMailer.host,
+    port: config.nodeMailer.port,
+    secure: config.nodeMailer.secure,
+    auth: {
+        user: config.nodeMailer.username,
+        pass: config.nodeMailer.password
+    },
 });
 
-const sendEmailVerificationEmail = async ({ toEmail, toName, subject, registrationToken }) => {
-    const emailTemplate = await emailTeamplateController.getEmailTemplate('verify-email');
-    if (emailTemplate && emailTemplate.emailContent) {
-        emailContent = emailTemplate.emailContent;
-        emailContent = emailContent.replace("{{fullName}}", toName);
-
-        emailContent = emailContent.replace(
-            "{{emailVerificationLink}}",
-            `<a href="${config.frontend}/verify-email/${registrationToken}">${config.frontend}/verify-email/${registrationToken}</a>`
-        );
-    } else {
-        throw new Error("Email template 'verify-email' not found.");
+const triggerEmail = async (templateType, userData, subject) => {    
+    if (templateType === 'verify-email') {
+        const emailTemplate = await emailTeamplateController.getEmailTemplate('verify-email');
+        if (emailTemplate && emailTemplate.emailContent) {
+            emailContent = emailTemplate.emailContent;
+            emailContent = emailContent.replace("{{fullName}}", userData.fullName);
+            emailContent = emailContent.replace(
+                "{{emailVerificationLink}}",
+                `<a href="${config.frontend}/verify-email/${userData.registrationToken[0].token}">${config.frontend}/verify-email/${userData.registrationToken[0].token}</a>`
+            );
+            emailContent = emailContent.replace("{{password}}", userData.password);
+        } else {
+            throw new Error(`Email template ${templateType} not found.`);
+        }
     }
-
-    const emailParams = new EmailParams()
-        .setFrom(config.mailSender.fromEmail)
-        .setReplyTo(config.mailSender.fromEmail)
-        .setSubject(subject)
-        .setHtml(emailContent)
-        .setText(emailContent)
-        .setTo(toEmail)
+    const mailOptions = {
+        from: config.nodeMailer.fromEmail,
+        to: userData.email,
+        subject,
+        html: emailContent,
+        text: emailContent.replace(/<[^>]+>/g, ''), // Fallback plain text
+    };
 
     try {
-        const response = await mailerSend.email.send(emailParams);
-        return;
+    const info = await transporter.sendMail(mailOptions);    
+    logger.info(`Email sent to ${mailOptions.to}: ${info.messageId}`);
+    return;
     } catch (error) {
         console.log(error);
-        
-        console.error('MailerSend error:', error?.response?.data || error.message);
+        console.error('Nodemailer  error:', error?.response?.data || error.message);
         throw new Error('Failed to send email');
     }
 };
 
 module.exports = {
-    sendEmailVerificationEmail,
+    triggerEmail,
 };

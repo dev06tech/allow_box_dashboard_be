@@ -32,6 +32,21 @@ const isRegisteredUser = async (req, res, next) => {
         req.token = token;
         next();
     } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            const decoded = jwt.decode(token); // decode without verifying
+            const user = await User.findById(decoded?._id);
+
+            if (user) {
+                user.tokens = user.tokens.filter(t => t.token !== token);
+                user.isLoggedIn = false;
+                await user.save();
+            }
+
+            return res.status(httpStatus.UNAUTHORIZED).json({
+                message: 'Token expired',
+                logout: true
+            });
+        }
         return res.status(httpStatus.UNAUTHORIZED).json({
             message: 'Invalid token',
             logout: true

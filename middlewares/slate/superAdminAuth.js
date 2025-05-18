@@ -13,8 +13,6 @@ const superAdminAuth = async (req, res, next) => {
         }
         try {
             const decoded = jwt.verify(token, config.jwt.secret);
-            console.log(decoded);
-
             const superAdmin = await SupertAdmin.findById(decoded._id);
             if (!superAdmin) {
                 return res.status(httpStatus.NOT_FOUND).json({ message: 'Super Admin not found' });
@@ -26,7 +24,6 @@ const superAdminAuth = async (req, res, next) => {
             req.token = token;
             next();
         } catch (error) {
-            console.log(error);
             if (error.name === 'TokenExpiredError') {
                 const decoded = jwt.decode(token); // decode without verifying
                 const superAdmin = await SupertAdmin.findById(decoded?._id);

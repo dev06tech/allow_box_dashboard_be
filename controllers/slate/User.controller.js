@@ -8,7 +8,7 @@ const generateOTP = () => {
     const max = 999999;
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-const createSchoolSuperAdmin = (userData, sendEmail = false) => {
+const createSchoolSuperAdmin = (userData, sendEmail = config.nodeMailer.activeStatus) => {
     const password = config.nodeEnvironment === 'development'
         ? 'Admin@123'
         : crypto.randomBytes(16).toString('hex') + 'Aa1!';
@@ -18,8 +18,10 @@ const createSchoolSuperAdmin = (userData, sendEmail = false) => {
             const user = new User(userData);
             await user.save();
             const registrationToken = await user.generateRegistrationToken();
+            user.registrationToken = registrationToken
+            user.password = password
             if (sendEmail) {
-                await emailerService.sendEmailVerificationEmail(user.email, user.fullName, 'Verify Your Email', registrationToken);
+                await emailerService.triggerEmail('verify-email', user, 'Verify Your Email');
             }
             resolve({ user: user.getPublicProfile(), registrationToken });
         } catch (error) {

@@ -7,6 +7,7 @@ const { default: httpStatus } = require("http-status")
 const crypto = require("crypto")
 const { getSchoolByIdAndAddSuperAdmin } = require("../../controllers/allow-box/School.controller")
 
+const emailService = require("../../services/mailsender.service")
 
 // const checkIsSuperAdminEmail = (email) => {
 //     //super admin and admin roles can only access 
@@ -24,7 +25,7 @@ const generateOTP = () => {
     const max = 999999;
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-const createUser = (userData, sendEmail = false) => {
+const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
     return new Promise(async (resolve, reject) => {
         const password = config.nodeEnvironment === 'development'
             ? 'Admin@123'
@@ -33,8 +34,9 @@ const createUser = (userData, sendEmail = false) => {
             const user = new User(userData);
             await user.save();
             const registrationToken = await user.generateRegistrationToken();
+            user.registrationToken = registrationToken
             if (sendEmail) {
-                await emailerService.sendEmailVerificationEmail(user.email, user.fullName, 'Verify Your Email', registrationToken);
+                await emailService.triggerEmail('verify-email', user, 'Verify Your Email');
             }
             resolve({ user: user.getPublicProfile(), registrationToken });
         } catch (error) {

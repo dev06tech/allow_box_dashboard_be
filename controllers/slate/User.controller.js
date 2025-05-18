@@ -35,8 +35,8 @@ const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
 const updateUser = (userUpdates) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const updatedUser = await User.findOneAndUpdate({ _id: userUpdates._id }, userUpdates, { new: true });
-            resolve(updatedUser);
+            const user = await User.findOneAndUpdate({ _id: userUpdates._id }, userUpdates, { new: true });
+            resolve(user.getPublicProfile());
         } catch (error) {
             reject(error);
         }

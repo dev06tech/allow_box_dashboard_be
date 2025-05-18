@@ -12,9 +12,7 @@ const superAdminAuth = async (req, res, next) => {
             return res.status(httpStatus.UNAUTHORIZED).json({ message: 'No token provided' });
         }
         try {
-            const decoded = jwt.verify(token, config.jwt.secret);   
-            console.log(decoded);
-                     
+            const decoded = jwt.verify(token, config.jwt.secret);
             const superAdmin = await SupertAdmin.findById(decoded._id);
             if (!superAdmin) {
                 return res.status(httpStatus.NOT_FOUND).json({ message: 'Super Admin not found' });
@@ -26,26 +24,25 @@ const superAdminAuth = async (req, res, next) => {
             req.token = token;
             next();
         } catch (error) {
-            console.log(error);
             if (error.name === 'TokenExpiredError') {
-            const decoded = jwt.decode(token); // decode without verifying
-            const superAdmin = await SupertAdmin.findById(decoded?._id);
+                const decoded = jwt.decode(token); // decode without verifying
+                const superAdmin = await SupertAdmin.findById(decoded?._id);
 
-            if (superAdmin) {
-                superAdmin.tokens = superAdmin.tokens.filter(t => t.token !== token);
-                superAdmin.isLoggedIn = false;
-                await superAdmin.save();
+                if (superAdmin) {
+                    superAdmin.tokens = superAdmin.tokens.filter(t => t.token !== token);
+                    superAdmin.isLoggedIn = false;
+                    await superAdmin.save();
+                }
+
+                return res.status(httpStatus.UNAUTHORIZED).json({
+                    message: 'Token expired',
+                    logout: true
+                });
             }
-
             return res.status(httpStatus.UNAUTHORIZED).json({
-                message: 'Token expired',
+                message: 'Invalid token',
                 logout: true
             });
-        }
-        return res.status(httpStatus.UNAUTHORIZED).json({
-            message: 'Invalid token',
-            logout: true
-        });
         }
     } catch (error) {
         next(error);

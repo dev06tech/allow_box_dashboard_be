@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-const triggerEmail = async (templateType, userData, subject) => {    
+const triggerEmail = async (templateType, userData, subject) => {
     if (templateType === 'verify-email') {
         const emailTemplate = await emailTeamplateController.getEmailTemplate('verify-email');
         if (emailTemplate && emailTemplate.emailContent) {
@@ -27,10 +27,27 @@ const triggerEmail = async (templateType, userData, subject) => {
                 "{{emailVerificationLink}}",
                 `<a href="${config.frontend}/verify-email/${userData.registrationToken[0].token}">${config.frontend}/verify-email/${userData.registrationToken[0].token}</a>`
             );
+            emailContent = emailContent.replace("{{username}}", userData.email);
             emailContent = emailContent.replace("{{password}}", userData.password);
-        } else {
+        }
+        else {
             throw new Error(`Email template ${templateType} not found.`);
         }
+    }
+    if (templateType === 're-verify-email') {
+        const emailTemplate = await emailTeamplateController.getEmailTemplate('re-verify-email');
+        if (emailTemplate && emailTemplate.emailContent) {
+            emailContent = emailTemplate.emailContent;
+            emailContent = emailContent.replace("{{fullName}}", userData.fullName);
+            emailContent = emailContent.replace(
+                "{{emailVerificationLink}}",
+                `<a href="${config.frontend}/verify-email/${userData.registrationToken[0].token}">${config.frontend}/verify-email/${userData.registrationToken[0].token}</a>`
+            );
+        }
+        else {
+            throw new Error(`Email template ${templateType} not found.`);
+        }
+
     }
     const mailOptions = {
         from: config.nodeMailer.fromEmail,
@@ -41,9 +58,9 @@ const triggerEmail = async (templateType, userData, subject) => {
     };
 
     try {
-    const info = await transporter.sendMail(mailOptions);    
-    logger.info(`Email sent to ${mailOptions.to}: ${info.messageId}`);
-    return;
+        const info = await transporter.sendMail(mailOptions);
+        logger.info(`Email sent to ${mailOptions.to}: ${info.messageId}`);
+        return;
     } catch (error) {
         console.log(error);
         console.error('Nodemailer  error:', error?.response?.data || error.message);

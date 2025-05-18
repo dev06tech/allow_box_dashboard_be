@@ -6,6 +6,7 @@ var emailTemplateSchema = new mongoose.Schema({
     required: true,
     enum: [
       "verify-email",
+      "re-verify-email", 
       "reset-password",
       "password-changed",
       "new-super-admin",

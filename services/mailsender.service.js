@@ -27,6 +27,7 @@ const triggerEmail = async (templateType, userData, subject) => {
                 "{{emailVerificationLink}}",
                 `<a href="${config.frontend}/verify-email/${userData.registrationToken[0].token}">${config.frontend}/verify-email/${userData.registrationToken[0].token}</a>`
             );
+            emailContent = emailContent.replace("{{username}}", userData.email);
             emailContent = emailContent.replace("{{password}}", userData.password);
         } else {
             throw new Error(`Email template ${templateType} not found.`);

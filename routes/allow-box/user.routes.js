@@ -120,7 +120,7 @@ router.post("/logout", userAuth, async (req, res, next) => {
 })
 
 router.put("/change-password", userAuth, validateChangePassword, async (req, res, next) => {
-  const { email, oldPassWord, newPassword } = req.body;
+  const { newPassword } = req.body;
   const requestedUser = req.user;
   try {
     const user = await userController.changePassword(newPassword, requestedUser);

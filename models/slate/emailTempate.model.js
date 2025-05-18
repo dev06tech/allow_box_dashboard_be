@@ -10,7 +10,6 @@ var emailTemplateSchema = new mongoose.Schema({
       "reset-password",
       "password-changed",
       "new-super-admin",
-      "new-super-admin",
       "new-teacher",
       "new-student",
       "new-parent",

@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema({
     },
     registeredVia: {
         type: String,
-        enum: ["email", "google", "slate"],
+        enum: ["email", "google", "slate", "allow-box"],
         default: "email",
     },
     passworResetToken: {
@@ -94,6 +94,8 @@ userSchema.methods.generatePasswordResetToken = async function () {
     const token = jwt.sign({ _id: user._id.toString() }, config.jwt.secret, {
         expiresIn: config.jwt.expiry,
     });
+    user.isLoggedIn = false;
+    user.tokens = [];
     user.passworResetToken = token;
     await user.save();
     return token;

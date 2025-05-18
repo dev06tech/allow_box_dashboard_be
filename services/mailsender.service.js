@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 
 const triggerEmail = async (templateType, userData, subject) => {
     if (templateType === 'verify-email') {
-        const emailTemplate = await emailTeamplateController.getEmailTemplate('verify-email');
+        const emailTemplate = await emailTeamplateController.getEmailTemplate(templateType);
         if (emailTemplate && emailTemplate.emailContent) {
             emailContent = emailTemplate.emailContent;
             emailContent = emailContent.replace("{{fullName}}", userData.fullName);
@@ -35,7 +35,7 @@ const triggerEmail = async (templateType, userData, subject) => {
         }
     }
     if (templateType === 're-verify-email') {
-        const emailTemplate = await emailTeamplateController.getEmailTemplate('re-verify-email');
+        const emailTemplate = await emailTeamplateController.getEmailTemplate(templateType);
         if (emailTemplate && emailTemplate.emailContent) {
             emailContent = emailTemplate.emailContent;
             emailContent = emailContent.replace("{{fullName}}", userData.fullName);
@@ -43,6 +43,17 @@ const triggerEmail = async (templateType, userData, subject) => {
                 "{{emailVerificationLink}}",
                 `<a href="${config.frontend}/verify-email/${userData.registrationToken[0].token}">${config.frontend}/verify-email/${userData.registrationToken[0].token}</a>`
             );
+        }
+        else {
+            throw new Error(`Email template ${templateType} not found.`);
+        }
+
+    }
+    if (templateType === 'password-changed') {
+        const emailTemplate = await emailTeamplateController.getEmailTemplate(templateType);
+        if (emailTemplate && emailTemplate.emailContent) {
+            emailContent = emailTemplate.emailContent;
+            emailContent = emailContent.replace("{{newPassword}}", userData.password);
         }
         else {
             throw new Error(`Email template ${templateType} not found.`);

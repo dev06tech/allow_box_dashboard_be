@@ -35,45 +35,23 @@ const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
             await user.save();
             const registrationToken = await user.generateRegistrationToken();
             user.registrationToken = registrationToken
+            user.password = password
             if (sendEmail) {
-                await emailService.triggerEmail('verify-email', user, 'Verify Your Email');
+                emailService.triggerEmail('verify-email', user, 'Verify Your Email')
+                .catch((err) => {
+                    logger.error(err)
+                })
             }
-            resolve({ user: user.getPublicProfile(), registrationToken });
+            resolve({ user: user.getPublicProfile() });
         } catch (error) {
             reject(error);
         }
     })
 }
 
-const createSchoolSuperAdmin = (fullName, email) => {
-    const password = crypto.randomBytes(16).toString('hex') + 'Aa1!';
+const verifyEmail = (user) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const user = new User({ fullName, email, password });
-            await user.save();
-            resolve({ user: superAdmin.getPublicProfile() });
-        } catch (error) {
-            reject(error);
-        }
-    })
-}
-
-const verifyEmail = (email) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const user = await User.findOne({ email });
-            if (!user) {
-                return reject({
-                    statusCode: httpStatus.BAD_REQUEST,
-                    message: "Invalid OTP or email provided"
-                });
-            }
-            if (user.isEmailVerified) {
-                return reject({
-                    statusCode: httpStatus.BAD_REQUEST,
-                    message: "Email already verified"
-                });
-            }
             user.isEmailVerified = true;
             await user.save();
             resolve(user.getPublicProfile());
@@ -83,7 +61,7 @@ const verifyEmail = (email) => {
     })
 }
 
-const resendVerificationEmail = (email) => {
+const resendVerificationEmail = (email, sendEmail=config.nodeMailer.activeStatus) => {
     return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findOne({ email });
@@ -101,7 +79,12 @@ const resendVerificationEmail = (email) => {
             }
             const registrationToken = await user.generateRegistrationToken();
             user.registrationToken = registrationToken
-            await emailService.triggerEmail('re-verify-email', user, 'Verify Your Email');
+            if(sendEmail){
+                emailService.triggerEmail('verify-email', user, 'Verify Your Email')
+                .catch((err) => {
+                    console.error('Failed to send verification email:', err.message);
+                })
+            }
             resolve();
         } catch (error) {
             reject(error);
@@ -175,22 +158,28 @@ const processGoogleAuth = async (code) => {
     }
 };
 
-const changePassword = (newPassword, user) => {
+const changePassword = (newPassword, user, sendEmail = config.nodeMailer.activeStatus) => {
     return new Promise(async (resolve, reject) => {
         try {
             user.password = newPassword;
             user.isLoggedIn = false;
             user.tokens = [];
+            user.passwordResetToken = null;
             await user.save();
             user.password = newPassword;
-            await emailService.triggerEmail('password-changed', user, 'Password Changed');
+            if (sendEmail) {
+                emailService.triggerEmail('password-changed', user, 'Password Changed')
+                    .catch((err) => {
+                        console.error('Failed to send password change email:', err.message);
+                    });
+            }
             resolve(user.getPublicProfile());
         } catch (error) {
             reject(error);
         }
     })
 }
-const forgotPassword = (email) => {
+const resetPassword = (email, sendEmail = config.nodeMailer.activeStatus ) => {
     return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findOne({ email });
@@ -202,8 +191,13 @@ const forgotPassword = (email) => {
             }
             const passwordResetToken = await user.generatePasswordResetToken();
             user.passwordResetToken = passwordResetToken;
-            await emailService.triggerEmail('re-verify-email', user, 'Verify Your Email');
-            resolve({ user: user.getPublicProfile(), emailTemplate });
+            if (sendEmail) {
+                emailService.triggerEmail('reset-password', user, 'Reset Your Password')
+                .catch((err) => {
+                    console.error('Failed to send password reset email:', err.message);
+                })
+            }
+            resolve();
         } catch (error) {
             reject(error);
         }
@@ -212,12 +206,11 @@ const forgotPassword = (email) => {
 
 module.exports = {
     createUser,
-    createSchoolSuperAdmin,
     verifyEmail,
     login,
     logout,
     processGoogleAuth,
     changePassword,
-    forgotPassword,
+    resetPassword,
     resendVerificationEmail
 };

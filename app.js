@@ -73,6 +73,10 @@ app.use("/api/allow-box/user", userRoutes);
 app.use("/api/slate/super-admin", superAdminRoutes);
 app.use("/api/slate/email-template", emailTemplateRoutes);
 
+app.get('/', (req, res) => {
+  res.status(200).send('API is up and running');
+});
+
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
   next(new ApiError(httpStatus.NOT_FOUND, "Not found"));

@@ -44,9 +44,14 @@ const userUpdateSchema = Joi.object({
     registeredVia: Joi.string().optional().messages({ 'string.empty': 'isRegisteredVia is required' }),
     associatedSchool: Joi.string().optional().messages({ 'string.empty': 'School id is required' })
 })
+
+const validateUserSchema = Joi.object({
+    userId: Joi.string().required().messages({ 'string.empty': 'User id is required' })
+})
 module.exports = {
     registrationSchema,
     schoolRegistrationSchema,
     loginSchema,
-    userUpdateSchema
+    userUpdateSchema,
+    validateUserSchema
 }

@@ -3,7 +3,8 @@ const {
     registrationSchema, 
     loginSchema,
     schoolRegistrationSchema,
-    userUpdateSchema
+    userUpdateSchema,
+    validateUserSchema
  } = require('../../../utils/validations/slate/users');
 
 const validateRegistration = (req, res, next) => {
@@ -38,9 +39,18 @@ const validateUserUpdate = (req, res, next) => {
     next();
 };
 
+const validateUserId = (req, res, next) => {
+    const { error } = validateUserSchema.validate(req.body);
+    if (error) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
+    }
+    next();
+};
+
 module.exports = {
     validateRegistration,
     validateLogin,
     validateSchoolRegistration,
-    validateUserUpdate
+    validateUserUpdate,
+    validateUserId
 };

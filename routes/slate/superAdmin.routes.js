@@ -3,10 +3,11 @@ const { default: httpStatus } = require('http-status');
 const router = Router();
 const config = require('../../config/config');
 
-const { validateSchoolRegistration, 
-  validateRegistration, 
-  validateLogin,
-  validateUserUpdate } = require('../../middlewares/validations/slate/user.validations');
+const { validateSchoolRegistration,
+    validateRegistration,
+    validateLogin,
+    validateUserUpdate,
+    validateUserId } = require('../../middlewares/validations/slate/user.validations');
 
 const { superAdminAuth } = require("../../middlewares/slate/superAdminAuth");
 
@@ -32,7 +33,7 @@ router.post("/register-school-user", validateSchoolRegistration, superAdminAuth,
     try {
         const createdSchool = await allowBoxSchoolController.createSchool(schoolData);
         userData.associatedSchool = createdSchool._id;
-        const createdUser = await slateUserController.createUser(userData);
+        const createdUser = await slateUserController.createAllowBoxUser(userData);
         res.status(httpStatus.CREATED).json({
             user: createdUser,
             school: createdSchool
@@ -71,12 +72,21 @@ router.put("/assign-role", superAdminAuth, async (req, res, next) => {
     }
 })
 
-router.put("/update-user", validateUserUpdate, superAdminAuth, async (req, res, next) => {
-  try {
-    const user = await slateUserController.updateUser(req.body);
-    res.status(httpStatus.OK).json(user);
-  } catch (error) {
-    next(error)
-  }
+router.put("/update-allowbox-user", validateUserUpdate, superAdminAuth, async (req, res, next) => {
+    try {
+        const user = await slateUserController.updateAllowBoxUser(req.body);
+        res.status(httpStatus.OK).json(user);
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.delete("/delete-allowbox-user", validateUserId, superAdminAuth, async (req, res, next) => {
+    try {
+        await slateUserController.deleteAllowBoxUser(req.body);
+        res.status(httpStatus.OK).send();
+    } catch (error) {
+        next(error)
+    }
 })
 module.exports = router;

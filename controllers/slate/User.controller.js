@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const {default:httpStatus} = require('http-status');
 const config = require('../../config/config');
 
 const User = require('../../models/allow-box/user.model');
@@ -8,7 +9,7 @@ const generateOTP = () => {
     const max = 999999;
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
+const createAllowBoxUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
     const password = config.nodeEnvironment === 'development'
         ? 'Admin@123'
         : crypto.randomBytes(16).toString('hex') + 'Aa1!';
@@ -32,7 +33,7 @@ const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
         }
     })
 }
-const updateUser = (userUpdates) => {
+const updateAllowBoxUser = (userUpdates) => {
     return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findOneAndUpdate({ _id: userUpdates._id }, userUpdates, { new: true });
@@ -43,7 +44,25 @@ const updateUser = (userUpdates) => {
     })
 }
 
+const deleteAllowBoxUser = (userData) => {    
+    const userId = userData.userId
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findByIdAndDelete({_id:userId});
+            if(!user){
+                return reject({statusCode: httpStatus.NOT_FOUND, message: "User not found"});
+            }            
+            resolve();
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+
+
 module.exports = {
-    createUser,
-    updateUser
+    createAllowBoxUser,
+    updateAllowBoxUser,
+    deleteAllowBoxUser
 }

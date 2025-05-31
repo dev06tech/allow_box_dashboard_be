@@ -35,10 +35,20 @@ const schoolSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        lastPaymentDate: {
+        numberofStudents: {
+            type: Number,
+        },
+        subscriptionAmount: {
+            type: Number,
+        },
+        subscriptionStartDate: {
             type: Date,
             default: null,
-        }
+        },
+        subscriptionEndDate: {
+            type: Date,
+            default: null,
+        },
     }
 );
 

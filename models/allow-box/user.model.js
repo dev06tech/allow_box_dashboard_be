@@ -135,6 +135,24 @@ userSchema.statics.findByEmailCredentials = async (email, password) => {
             message: "Incorrect email or password"
         };
     }
+    if (!user.isEmailVerified) {
+        throw {
+            statusCode: httpStatus.FORBIDDEN,
+            message: "Please verify your email first"
+        };
+    }
+    if(user.isLoggedIn) {
+        throw {
+            statusCode: httpStatus.FORBIDDEN,
+            message: "User already logged in, Please logout and try again"
+        };
+    }
+    if(user.isBlocked) {
+        throw {
+            statusCode: httpStatus.FORBIDDEN,
+            message: "Your account has been blocked"
+        };
+    }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
         throw {

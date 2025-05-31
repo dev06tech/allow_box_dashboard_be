@@ -204,6 +204,16 @@ const resetPassword = (email, sendEmail = config.nodeMailer.activeStatus ) => {
     })
 }
 
+const updateAllowBoxUser = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findOneAndUpdate({ _id: data._id }, data, { new: true });
+            resolve(user.getPublicProfile());
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
 module.exports = {
     createUser,
     verifyEmail,
@@ -212,5 +222,6 @@ module.exports = {
     processGoogleAuth,
     changePassword,
     resetPassword,
-    resendVerificationEmail
+    resendVerificationEmail,
+    updateAllowBoxUser
 };

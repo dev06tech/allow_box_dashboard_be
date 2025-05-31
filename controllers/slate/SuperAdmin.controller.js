@@ -59,19 +59,46 @@ const logout = (superAdmin, token) => {
     })
 }
 
-const assignRole = ( data) => {
+const assignRole = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const users = await User.updateMany({ _id: { $in: data.ids } }, { $set: { role: data.role } });
-            if (!users.matchedCount === 0) {
-                return reject({ statusCode: httpStatus.NOT_FOUND, message: "No users found" });
-            }
-            resolve(users);
+            const results = await Promise.allSettled(
+                data.ids.map(async (id) => {
+                    const updated = await User.findByIdAndUpdate(id, { role: data.role }, { new: true });
+                    if (!updated) {
+                        throw new Error("User not found");
+                    }
+                    return { id, user: updated.getPublicProfile() };
+                })
+            );
+
+            const successes = [];
+            const failures = [];
+
+            results.forEach((result, index) => {
+                const id = data.ids[index];
+                if (result.status === 'fulfilled') {
+                    successes.push({
+                        id,
+                        status: 'fulfilled',
+                        user: result.value.user
+                    });
+                } else {
+                    failures.push({
+                        id,
+                        status: 'rejected',
+                        reason: result.reason.message || "Unknown error"
+                    });
+                }
+            });
+
+            resolve({ successes, failures });
         } catch (error) {
             reject(error);
         }
-    })
-}
+    });
+};
+
 module.exports = {
     createSuperAdmin,
     login,

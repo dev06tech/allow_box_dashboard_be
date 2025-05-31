@@ -67,6 +67,7 @@ const userRoleSchema = Joi.object({
       'any.only': `"role" must be one of ['super-admin', 'admin', 'teacher', 'staff', 'student']`
     })
 });
+
 module.exports = {
     registrationSchema,
     schoolRegistrationSchema,

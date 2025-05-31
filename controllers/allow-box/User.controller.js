@@ -214,6 +214,22 @@ const updateAllowBoxUser = (data) => {
         }
     })
 }
+
+const deleteAllowBoxUser = (userData) => {    
+    const userId = userData.userId
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findByIdAndDelete({_id:userId});
+            if(!user){
+                return reject({statusCode: httpStatus.NOT_FOUND, message: "User not found"});
+            }            
+            resolve();
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 module.exports = {
     createUser,
     verifyEmail,
@@ -223,5 +239,6 @@ module.exports = {
     changePassword,
     resetPassword,
     resendVerificationEmail,
-    updateAllowBoxUser
+    updateAllowBoxUser,
+    deleteAllowBoxUser
 };

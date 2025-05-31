@@ -14,7 +14,8 @@ const {
   validateChangePassword,
   validateResetPassword,
   validateNewUser,
-  validateUserUpdate
+  validateUserUpdate,
+  validateUserId
 } = require('../../middlewares/validations/allow-box/user.validations');
 
 
@@ -154,6 +155,15 @@ router.put("/super-admin/update-user", validateUserUpdate, superAdminAuth, async
     try {
         const user = await userController.updateAllowBoxUser(req.body);
         res.status(httpStatus.OK).json(user);
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.delete("/super-admin/delete-user", validateUserId, superAdminAuth, async (req, res, next) => {
+    try {
+        await userController.deleteAllowBoxUser(req.body);
+        res.status(httpStatus.OK).send();
     } catch (error) {
         next(error)
     }

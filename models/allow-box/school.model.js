@@ -35,7 +35,7 @@ const schoolSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        numberofStudents: {
+        numberOfStudents: {
             type: Number,
         },
         subscriptionAmount: {

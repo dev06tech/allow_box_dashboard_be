@@ -148,7 +148,7 @@ router.put("/reset-password", resetPasswordAuth, validateChangePassword, async (
   }
 })
 
-router.post("/add-new-user", validateNewUser, superAdminAuth, async (req, res, next) => {
+router.post("/super-admin/add-new-user", validateNewUser, superAdminAuth, async (req, res, next) => {
   const userData = req.body;
   userData.registeredVia = "allow-box";
   try {

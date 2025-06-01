@@ -11,14 +11,13 @@ const superAdminAuth = async (req, res, next) => {
                 message: 'Authentication required. Please provide a valid Bearer token.'
             });
         }
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const token = req.header('Authorization')?.replace('Bearer ', '');        
         if (!token) {
             return res.status(httpStatus.UNAUTHORIZED).json({ message: 'No token provided' });
         }
         try {
-            // Verify token
-            const decoded = jwt.verify(token, config.jwt.secret);
-            const user = await User.findById(decoded._id);
+            const decoded = jwt.verify(token, config.jwt.secret);            
+            const user = await User.findById(decoded._id);                        
             if (!user) {
                 return res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
             }
@@ -30,7 +29,7 @@ const superAdminAuth = async (req, res, next) => {
                 await user.save();
                 return res.status(httpStatus.BAD_REQUEST).json({ message: 'User not logged in, Please login' });
             }
-            if (!user.role !== 'super-admin') {
+            if (user.role !== 'super-admin') {
                 return res.status(httpStatus.UNAUTHORIZED).json({ message: 'You are not a super admin' });
             }
             req.user = user;

@@ -13,7 +13,9 @@ const {
   validateLogin,
   validateChangePassword,
   validateResetPassword,
-  validateNewUser
+  validateNewUser,
+  validateUserUpdate,
+  validateUserId
 } = require('../../middlewares/validations/allow-box/user.validations');
 
 
@@ -59,16 +61,6 @@ router.post("/resend-verification-email", validateEmailVerification, async (req,
 
 router.post("/login", validateLogin, async (req, res, next) => {
   const { email, password } = req.body;
-  if (!email) {
-    return res.status(httpStatus.BAD_REQUEST).json({
-      message: "Please Provide Email"
-    });
-  }
-  if (!password) {
-    return res.status(httpStatus.BAD_REQUEST).json({
-      message: "Please Provide Password"
-    });
-  }
   try {
     const user = await userController.login(email, password);
     res.status(httpStatus.OK).json(user);
@@ -148,7 +140,7 @@ router.put("/reset-password", resetPasswordAuth, validateChangePassword, async (
   }
 })
 
-router.post("/add-new-user", validateNewUser, superAdminAuth, async (req, res, next) => {
+router.post("/super-admin/add-new-user", validateNewUser, superAdminAuth, async (req, res, next) => {
   const userData = req.body;
   userData.registeredVia = "allow-box";
   try {
@@ -157,6 +149,24 @@ router.post("/add-new-user", validateNewUser, superAdminAuth, async (req, res, n
   } catch (error) {
     next(error)
   }
+})
+
+router.put("/super-admin/update-user", validateUserUpdate, superAdminAuth, async (req, res, next) => {
+    try {
+        const user = await userController.updateAllowBoxUser(req.body);
+        res.status(httpStatus.OK).json(user);
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.delete("/super-admin/delete-user", validateUserId, superAdminAuth, async (req, res, next) => {
+    try {
+        await userController.deleteAllowBoxUser(req.body);
+        res.status(httpStatus.OK).send();
+    } catch (error) {
+        next(error)
+    }
 })
 
 module.exports = router;

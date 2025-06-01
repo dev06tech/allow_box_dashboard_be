@@ -7,7 +7,9 @@ const { validateSchoolRegistration,
     validateRegistration,
     validateLogin,
     validateUserUpdate,
-    validateUserId } = require('../../middlewares/validations/slate/user.validations');
+    validateUserId,
+    validateUserRoleData 
+} = require('../../middlewares/validations/slate/user.validations');
 
 const { superAdminAuth } = require("../../middlewares/slate/superAdminAuth");
 
@@ -63,7 +65,7 @@ router.get("/logout", superAdminAuth, async (req, res, next) => {
     }
 })
 
-router.put("/assign-role", superAdminAuth, async (req, res, next) => {
+router.put("/allow-box-users/assign-role", validateUserRoleData, superAdminAuth, async (req, res, next) => {
     try {
         const user = await slateSuperAdminController.assignRole(req.body);
         res.status(httpStatus.OK).json(user);
@@ -72,7 +74,7 @@ router.put("/assign-role", superAdminAuth, async (req, res, next) => {
     }
 })
 
-router.put("/update-allowbox-user", validateUserUpdate, superAdminAuth, async (req, res, next) => {
+router.put("/allow-box-users/update", validateUserUpdate, superAdminAuth, async (req, res, next) => {
     try {
         const user = await slateUserController.updateAllowBoxUser(req.body);
         res.status(httpStatus.OK).json(user);
@@ -81,7 +83,7 @@ router.put("/update-allowbox-user", validateUserUpdate, superAdminAuth, async (r
     }
 })
 
-router.delete("/delete-allowbox-user", validateUserId, superAdminAuth, async (req, res, next) => {
+router.delete("/allow-box-users/delete", validateUserId, superAdminAuth, async (req, res, next) => {
     try {
         await slateUserController.deleteAllowBoxUser(req.body);
         res.status(httpStatus.OK).send();

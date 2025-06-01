@@ -204,6 +204,32 @@ const resetPassword = (email, sendEmail = config.nodeMailer.activeStatus ) => {
     })
 }
 
+const updateAllowBoxUser = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findOneAndUpdate({ _id: data._id }, data, { new: true });
+            resolve(user.getPublicProfile());
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+const deleteAllowBoxUser = (userData) => {    
+    const userId = userData.userId
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findByIdAndDelete({_id:userId});
+            if(!user){
+                return reject({statusCode: httpStatus.NOT_FOUND, message: "User not found"});
+            }            
+            resolve();
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 module.exports = {
     createUser,
     verifyEmail,
@@ -212,5 +238,7 @@ module.exports = {
     processGoogleAuth,
     changePassword,
     resetPassword,
-    resendVerificationEmail
+    resendVerificationEmail,
+    updateAllowBoxUser,
+    deleteAllowBoxUser
 };

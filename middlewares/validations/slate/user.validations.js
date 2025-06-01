@@ -4,7 +4,8 @@ const {
     loginSchema,
     schoolRegistrationSchema,
     userUpdateSchema,
-    validateUserSchema
+    validateUserSchema,
+    userRoleSchema
  } = require('../../../utils/validations/slate/users');
 
 const validateRegistration = (req, res, next) => {
@@ -47,10 +48,19 @@ const validateUserId = (req, res, next) => {
     next();
 };
 
+const validateUserRoleData = (req, res, next) => {
+    const { error } = userRoleSchema.validate(req.body);
+    if (error) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
+    }
+    next();
+};
+
 module.exports = {
     validateRegistration,
     validateLogin,
     validateSchoolRegistration,
     validateUserUpdate,
-    validateUserId
+    validateUserId,
+    validateUserRoleData
 };

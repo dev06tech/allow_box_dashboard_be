@@ -9,6 +9,7 @@ const schoolRegistrationSchema = Joi.object({
         email: Joi.string().email().required().messages({ 'string.empty': 'School email is required', 'string.email': 'School email must be valid' }),
         phone: Joi.string().required().messages({ 'string.empty': 'Phone number is required' }),
         address: Joi.string().required().messages({ 'string.empty': 'Address is required' }),
+        numberOfStudents: Joi.number().required().messages({ 'string.empty': 'Number of students is required' }),
     }).required(),
     userData: Joi.object({
         email: Joi.string().email().required().messages({ 'string.empty': 'Admin email is required', 'string.email': 'Admin email must be valid' }),
@@ -48,10 +49,31 @@ const userUpdateSchema = Joi.object({
 const validateUserSchema = Joi.object({
     userId: Joi.string().required().messages({ 'string.empty': 'User id is required' })
 })
+
+const userRoleSchema = Joi.object({
+  ids: Joi.array()
+    .items(Joi.string().regex(/^[0-9a-fA-F]{24}$/))
+    .min(1)
+    .required()
+    .messages({
+      'array.base': `"ids" must be an array of MongoDB ObjectIds`,
+      'array.min': `"ids" must contain at least one ID`,
+      'string.pattern.base': `"ids" must be valid 24-character MongoDB ObjectIds`
+    }),
+
+  role: Joi.string()
+    .valid("super-admin", "teacher", "student", "parent", "staff", "support")
+    .required()
+    .messages({
+      'any.only': `"role" must be one of ['super-admin', 'admin', 'teacher', 'staff', 'student']`
+    })
+});
+
 module.exports = {
     registrationSchema,
     schoolRegistrationSchema,
     loginSchema,
     userUpdateSchema,
-    validateUserSchema
+    validateUserSchema,
+    userRoleSchema
 }

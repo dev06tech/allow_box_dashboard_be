@@ -41,12 +41,29 @@ const resetPasswordSchema = Joi.object({
     email: Joi.string().email().required().messages({'string.empty': 'Email is required'}),
 }).strict();
 
-const newUserchema = Joi.object({
+const newUserSchema = Joi.object({
     fullName: Joi.string().required().messages({'string.empty': 'Full name is required'}),
     email: Joi.string().email().required().messages({'string.empty': 'Email is required'}),
     role: Joi.string().valid("super-admin", "teacher", "student", "parent", "support").required().messages({ 'string.empty': 'Admin role is required' }),
     associatedSchool: Joi.string().required().messages({ 'string.empty': 'School id is required' }),
 }).strict();
+
+const userUpdateSchema = Joi.object({
+    _id: Joi.string().required().messages({ 'string.empty': 'User id is required' }),
+    fullName: Joi.string().optional().messages({ 'string.empty': 'Full name is required' }),
+    email: Joi.string().email().optional().messages({ 'string.empty': 'Email is required' }),
+    password: Joi.string().min(6).optional().messages({ 'string.empty': 'Password is required' }),
+    role: Joi.string().valid("super-admin", "teacher", "student", "parent", "support").optional().messages({ 'string.empty': 'Admin role is required' }),
+    isBlocked: Joi.boolean().optional().messages({ 'string.empty': 'isBlocked is required' }),
+    isEmailVerified: Joi.boolean().optional().messages({ 'string.empty': 'isEmailVerified is required' }),
+    isLoggedIn: Joi.boolean().optional().messages({ 'string.empty': 'isLoggedIn is required' }),
+    registeredVia: Joi.string().optional().messages({ 'string.empty': 'isRegisteredVia is required' }),
+    associatedSchool: Joi.string().optional().messages({ 'string.empty': 'School id is required' })
+})
+
+const validateUserSchema = Joi.object({
+    userId: Joi.string().required().messages({ 'string.empty': 'User id is required' })
+})
 
 module.exports = {
     registrationSchema,
@@ -54,5 +71,7 @@ module.exports = {
     loginSchema,
     updatePasswordSchema,
     resetPasswordSchema,
-    newUserchema
+    newUserSchema,
+    userUpdateSchema,
+    validateUserSchema
 }

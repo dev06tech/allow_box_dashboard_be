@@ -27,9 +27,12 @@ const generateOTP = () => {
 }
 const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
     return new Promise(async (resolve, reject) => {
+        console.log(config.nodeEnvironment);
+        
         const password = config.nodeEnvironment === 'development'
             ? 'Admin@123'
-            : crypto.randomBytes(16).toString('hex') + 'Aa1!'; userData.password = password;
+            : crypto.randomBytes(16).toString('hex') + 'Aa1!'; 
+            userData.password = password;
         try {
             const user = new User(userData);
             await user.save();

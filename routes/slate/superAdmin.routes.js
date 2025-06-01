@@ -8,7 +8,7 @@ const { validateSchoolRegistration,
     validateLogin,
     validateUserUpdate,
     validateUserId,
-    validateUserRoleData 
+    validateUserRoleData
 } = require('../../middlewares/validations/slate/user.validations');
 
 const { superAdminAuth } = require("../../middlewares/slate/superAdminAuth");
@@ -87,6 +87,17 @@ router.delete("/allow-box-users/delete", validateUserId, superAdminAuth, async (
     try {
         await slateUserController.deleteAllowBoxUser(req.body);
         res.status(httpStatus.OK).send();
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.get("/dashboard", superAdminAuth, async (req, res, next) => {
+    try {
+        const dashboardData = await slateSuperAdminController.getDashboardData();
+        console.log(dashboardData);
+        
+        res.status(httpStatus.OK).json(dashboardData);
     } catch (error) {
         next(error)
     }

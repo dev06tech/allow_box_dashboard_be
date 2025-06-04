@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const logger = require("../../config/logger");
 
 const schoolSchema = new mongoose.Schema(
     {
@@ -54,6 +55,11 @@ const schoolSchema = new mongoose.Schema(
 );
 
 schoolSchema.set("timestamps", true);
+
+schoolSchema.index({ createdAt: 1 });
+schoolSchema.index({ subscriptionStartDate: 1 });
+schoolSchema.index({ subscriptionEndDate: 1 });
+
 const School = mongoose.model("school", schoolSchema);
 
 module.exports = School

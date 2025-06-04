@@ -37,7 +37,7 @@ const errorHandler = (err, req, res, next) => {
     }
     if (config.env === 'production' && !err.isOperational) {
         statusCode = httpStatus.INTERNAL_SERVER_ERROR;
-        message = httpStatus[httpStatus.INTERNAL_SERVER_ERROR];
+        message = err.message;
     }
     res.locals.errorMessage = err.message;
     const response = {

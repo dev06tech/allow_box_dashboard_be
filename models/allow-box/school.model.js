@@ -40,6 +40,7 @@ const schoolSchema = new mongoose.Schema(
         },
         subscriptionAmount: {
             type: Number,
+            default: null,
         },
         subscriptionStartDate: {
             type: Date,

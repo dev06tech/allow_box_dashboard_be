@@ -94,9 +94,7 @@ router.delete("/allow-box-users/delete", validateUserId, superAdminAuth, async (
 
 router.get("/dashboard", superAdminAuth, async (req, res, next) => {
     try {
-        const dashboardData = await slateSuperAdminController.getDashboardData();
-        console.log(dashboardData);
-        
+        const dashboardData = await slateSuperAdminController.getDashboardData();        
         res.status(httpStatus.OK).json(dashboardData);
     } catch (error) {
         next(error)

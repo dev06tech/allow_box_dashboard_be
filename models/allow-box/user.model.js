@@ -3,6 +3,7 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const config = require("../../config/config");
+const logger = require("../../config/logger");
 const { default: httpStatus } = require("http-status");
 
 const userSchema = new mongoose.Schema({
@@ -189,5 +190,9 @@ userSchema.pre('findOneAndUpdate', async function (next) {
 });
 
 userSchema.set("timestamps", true);
+
+userSchema.index({ createdAt: 1 });
+
 const User = mongoose.model("user", userSchema);
+
 module.exports = User;

@@ -10,6 +10,8 @@ const schoolRegistrationSchema = Joi.object({
         phone: Joi.string().required().messages({ 'string.empty': 'Phone number is required' }),
         address: Joi.string().required().messages({ 'string.empty': 'Address is required' }),
         numberOfStudents: Joi.number().required().messages({ 'string.empty': 'Number of students is required' }),
+        principalName: Joi.string().required().messages({ 'string.empty': 'Principal name is required' }),
+        schoolOwnerName: Joi.string().required().messages({ 'string.empty': 'School owner name is required' }),
     }).required(),
     userData: Joi.object({
         email: Joi.string().email().required().messages({ 'string.empty': 'Admin email is required', 'string.email': 'Admin email must be valid' }),

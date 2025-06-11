@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const {default:httpStatus} = require('http-status');
+const { default: httpStatus } = require('http-status');
 const config = require('../../config/config');
 
 const User = require('../../models/allow-box/user.model');
@@ -23,9 +23,9 @@ const createAllowBoxUser = (userData, sendEmail = config.nodeMailer.activeStatus
             user.password = password
             if (sendEmail) {
                 emailerService.triggerEmail('verify-email', user, 'Verify Your Email')
-                .catch((err) => {
-                    console.error('Failed to send verification email:', err.message);
-                })
+                    .catch((err) => {
+                        console.error('Failed to send verification email:', err.message);
+                    })
             }
             resolve({ user: user.getPublicProfile(), registrationToken });
         } catch (error) {
@@ -44,14 +44,14 @@ const updateAllowBoxUser = (userUpdates) => {
     })
 }
 
-const deleteAllowBoxUser = (userData) => {    
+const deleteAllowBoxUser = (userData) => {
     const userId = userData.userId
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findByIdAndDelete({_id:userId});
-            if(!user){
-                return reject({statusCode: httpStatus.NOT_FOUND, message: "User not found"});
-            }            
+            const user = await User.findByIdAndDelete({ _id: userId });
+            if (!user) {
+                return reject({ statusCode: httpStatus.NOT_FOUND, message: "User not found" });
+            }
             resolve();
         } catch (error) {
             reject(error);
@@ -59,10 +59,32 @@ const deleteAllowBoxUser = (userData) => {
     })
 }
 
+const getAllowBoxUsers = async (page, limit) => {
+    try {
+        const skip = (page - 1) * limit;
+        const [users, totalCount] = await Promise.all([
+            User.find()
+                .select('_id fullName email role associatedSchool').lean()
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            User.countDocuments()
+        ]);
 
+        return {
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / limit),
+            totalUsers: totalCount,
+            users,
+        };
+    } catch (error) {
+        throw error;
+    }
+};
 
 module.exports = {
     createAllowBoxUser,
     updateAllowBoxUser,
-    deleteAllowBoxUser
+    deleteAllowBoxUser,
+    getAllowBoxUsers
 }

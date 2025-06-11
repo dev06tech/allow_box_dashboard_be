@@ -17,7 +17,6 @@ const slateSuperAdminController = require("../../controllers/slate/SuperAdmin.co
 const allowBoxSchoolController = require("../../controllers/slate/School.controller");
 const slateUserController = require("../../controllers/slate/User.controller");
 
-
 router.post("/register", validateRegistration, async (req, res, next) => {
     const { fullName, email, password } = req.body;
     try {
@@ -65,6 +64,33 @@ router.get("/logout", superAdminAuth, async (req, res, next) => {
     }
 })
 
+router.get("/dashboard", superAdminAuth, async (req, res, next) => {
+    try {
+        const dashboardData = await slateSuperAdminController.getDashboardData();        
+        res.status(httpStatus.OK).json(dashboardData);
+    } catch (error) {
+        next(error)
+    }
+})
+
+//alllowbox users related routes
+router.get("/allow-box-users", superAdminAuth, async (req, res, next) => {
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
+        if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+            return res.status(httpStatus.BAD_REQUEST).json({
+                message: "Invalid pagination parameters. 'page' and 'limit' must be positive numbers."
+            });
+        }
+    try {
+        const result = await slateUserController.getAllowBoxUsers(page, limit);
+        res.status(httpStatus.OK).json(result);
+    } catch (error) {
+        next(error);
+    }
+});
+
+
 router.put("/allow-box-users/assign-role", validateUserRoleData, superAdminAuth, async (req, res, next) => {
     try {
         const user = await slateSuperAdminController.assignRole(req.body);
@@ -92,12 +118,21 @@ router.delete("/allow-box-users/delete", validateUserId, superAdminAuth, async (
     }
 })
 
-router.get("/dashboard", superAdminAuth, async (req, res, next) => {
+//allowbox schools related routes
+router.get("/allow-box-schools", superAdminAuth, async (req, res, next) => {
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
+        if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+            return res.status(httpStatus.BAD_REQUEST).json({
+                message: "Invalid pagination parameters. 'page' and 'limit' must be positive numbers."
+            });
+        }
     try {
-        const dashboardData = await slateSuperAdminController.getDashboardData();        
-        res.status(httpStatus.OK).json(dashboardData);
+        const result = await allowBoxSchoolController.getAllowBoxSchools(page, limit);
+        res.status(httpStatus.OK).json(result);
     } catch (error) {
-        next(error)
+        next(error);
     }
-})
+});
+
 module.exports = router;

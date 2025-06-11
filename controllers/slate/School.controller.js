@@ -13,6 +13,33 @@ const createSchool = (schoolData) => {
     })
 }
 
+const getAllowBoxSchools = (page, limit) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const skip = (page - 1) * limit;
+            const [schools, totalCount] = await Promise.all([
+                School.find()
+                    .skip(skip)
+                    .limit(limit)
+                    .select('_id name pricipalName paymentStatus lastPaymentDate numberOfStudents subscriptionAmount subscriptionStartDate subscriptionEndDate')
+                    .lean(),
+                School.countDocuments()  // You had User.countDocuments() mistakenly here
+            ]);
+
+            resolve({
+                currentPage: page,
+                totalPages: Math.ceil(totalCount / limit),
+                totalSchools: totalCount,
+                schools,
+            });
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+
 module.exports = {
-    createSchool
+    createSchool,
+    getAllowBoxSchools
 }

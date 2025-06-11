@@ -61,6 +61,10 @@ const schoolSchema = new mongoose.Schema(
             type: Date,
             default: null,
         },
+        isActive: {
+            type: Boolean,
+            default: false,
+        }
     }
 );
 

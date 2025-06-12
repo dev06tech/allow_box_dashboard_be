@@ -15,6 +15,16 @@ const schoolSchema = new mongoose.Schema(
             lowercase: true,
             required: true,
         },
+        principalName: {
+            type: String,
+            trim: true,
+            required: true,
+        },
+        schoolOwnerName: {
+            type: String,
+            trim: true,
+            required: true,
+        },
         phone: {
             type: String,
             required: true,
@@ -51,6 +61,10 @@ const schoolSchema = new mongoose.Schema(
             type: Date,
             default: null,
         },
+        isActive: {
+            type: Boolean,
+            default: false,
+        }
     }
 );
 

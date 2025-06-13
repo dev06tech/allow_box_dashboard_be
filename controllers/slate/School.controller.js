@@ -38,8 +38,26 @@ const getAllowBoxSchools = (page, limit) => {
     });
 }
 
+const getAllowBoxSchool = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const school = await School.findById(id);
+            if (!school) {
+                return reject({
+                    statusCode: 404,
+                    message: "School Not found"
+                });
+            }
+            resolve(school);
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 
 module.exports = {
     createSchool,
-    getAllowBoxSchools
+    getAllowBoxSchools,
+    getAllowBoxSchool
 }

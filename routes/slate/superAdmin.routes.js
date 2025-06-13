@@ -90,6 +90,14 @@ router.get("/allow-box-users", superAdminAuth, async (req, res, next) => {
     }
 });
 
+router.get("/allow-box-user/:userId", superAdminAuth, async (req, res, next) => {
+    try {
+        const result = await slateUserController.getAllowBoxUser(req.params.userId);
+        res.status(httpStatus.OK).json(result);
+    } catch (error) {
+        next(error);
+    }
+});
 
 router.put("/allow-box-users/assign-role", validateUserRoleData, superAdminAuth, async (req, res, next) => {
     try {
@@ -129,6 +137,17 @@ router.get("/allow-box-schools", superAdminAuth, async (req, res, next) => {
         }
     try {
         const result = await allowBoxSchoolController.getAllowBoxSchools(page, limit);
+        res.status(httpStatus.OK).json(result);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get("/allow-box-school/:schoolId", superAdminAuth, async (req, res, next) => {
+    console.log(req.params);
+    
+    try {
+        const result = await allowBoxSchoolController.getAllowBoxSchool(req.params.schoolId);
         res.status(httpStatus.OK).json(result);
     } catch (error) {
         next(error);

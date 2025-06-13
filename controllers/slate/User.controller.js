@@ -82,9 +82,25 @@ const getAllowBoxUsers = async (page, limit) => {
     }
 };
 
+const getAllowBoxUser = async (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findById(userId);
+            if (!user) {
+                return reject({ statusCode: httpStatus.NOT_FOUND, message: "User not found" });
+            }
+            resolve(user.getPublicProfile());
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+ 
+
 module.exports = {
     createAllowBoxUser,
     updateAllowBoxUser,
     deleteAllowBoxUser,
-    getAllowBoxUsers
+    getAllowBoxUsers,
+    getAllowBoxUser
 }

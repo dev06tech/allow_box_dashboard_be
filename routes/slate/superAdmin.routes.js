@@ -77,13 +77,17 @@ router.get("/dashboard", superAdminAuth, async (req, res, next) => {
 router.get("/allow-box-users", superAdminAuth, async (req, res, next) => {
     const page = parseInt(req.query.page);
     const limit = parseInt(req.query.limit);
+    const search = req.query.search || "";
     if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
         return res.status(httpStatus.BAD_REQUEST).json({
             message: "Invalid pagination parameters. 'page' and 'limit' must be positive numbers."
         });
     }
     try {
-        const result = await slateUserController.getAllowBoxUsers(page, limit);
+        const result = await slateUserController.getAllowBoxUsers(page, limit, search);
+        if (result.totalUsers === 0) {
+            return res.status(httpStatus.NOT_FOUND).json({ message: "No users found" });
+        }
         res.status(httpStatus.OK).json(result);
     } catch (error) {
         next(error);

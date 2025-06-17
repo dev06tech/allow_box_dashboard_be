@@ -59,18 +59,22 @@ const deleteAllowBoxUser = (userData) => {
     })
 }
 
-const getAllowBoxUsers = async (page, limit) => {
+const getAllowBoxUsers = async (page, limit, searchQuery) => {
+    const filter = {};
+    if (searchQuery && searchQuery.trim() !== "") {
+        filter.fullName = { $regex: new RegExp(searchQuery, "i") };
+    }
     try {
         const skip = (page - 1) * limit;
         const [users, totalCount] = await Promise.all([
-            User.find()
+            User.find(filter)
                 .select('_id fullName email role associatedSchool')
                 .populate('associatedSchool', 'name')
                 .skip(skip)
                 .limit(limit)
                 .sort({ createdAt: -1 })
                 .lean(),
-            User.countDocuments()
+            User.countDocuments(filter)
         ]);
 
         return {

@@ -78,6 +78,17 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "School"
     },
+    attendance: [{
+        date: {
+            type: Date,
+        },
+        isPresent: {
+            type: Boolean
+        },
+        isHalfDay: {
+            type: Boolean
+        }
+    }],
     isBlocked: {
         type: Boolean,
         default: false
@@ -142,13 +153,13 @@ userSchema.statics.findByEmailCredentials = async (email, password) => {
             message: "Please verify your email first"
         };
     }
-    if(user.isLoggedIn) {
+    if (user.isLoggedIn) {
         throw {
             statusCode: httpStatus.FORBIDDEN,
             message: "User already logged in, Please logout and try again"
         };
     }
-    if(user.isBlocked) {
+    if (user.isBlocked) {
         throw {
             statusCode: httpStatus.FORBIDDEN,
             message: "Your account has been blocked"
@@ -166,6 +177,7 @@ userSchema.statics.findByEmailCredentials = async (email, password) => {
 
 userSchema.pre("save", async function (next) {
     const user = this;
+    
     if (user.isModified("password")) {
         user.password = await bcrypt.hash(user.password, 8);
     }
@@ -192,6 +204,8 @@ userSchema.pre('findOneAndUpdate', async function (next) {
 userSchema.set("timestamps", true);
 
 userSchema.index({ createdAt: 1 });
+
+userSchema.index({ role: 1 });
 
 const User = mongoose.model("user", userSchema);
 

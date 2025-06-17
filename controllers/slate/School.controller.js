@@ -22,6 +22,7 @@ const getAllowBoxSchools = (page, limit) => {
                     .skip(skip)
                     .limit(limit)
                     .select('_id name pricipalName paymentStatus lastPaymentDate numberOfStudents subscriptionAmount subscriptionStartDate subscriptionEndDate')
+                    .sort({ createdAt: -1 })
                     .lean(),
                 School.countDocuments()  // You had User.countDocuments() mistakenly here
             ]);

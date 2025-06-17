@@ -1,12 +1,10 @@
 const config = require("../../config/config")
 const logger = require("../../config/logger")
 const User = require("../../models/allow-box/user.model")
-const EmailTemplate = require("../../models/slate/emailTempate.model")
+const Attendance = require("../../models/allow-box/attendance.model")
 const googleAuthService = require("../../services/google.service")
 const { default: httpStatus } = require("http-status")
 const crypto = require("crypto")
-const { getSchoolByIdAndAddSuperAdmin } = require("../../controllers/allow-box/School.controller")
-
 const emailService = require("../../services/mailsender.service")
 
 // const checkIsSuperAdminEmail = (email) => {
@@ -26,11 +24,11 @@ const generateOTP = () => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
-    return new Promise(async (resolve, reject) => {        
+    return new Promise(async (resolve, reject) => {
         const password = config.nodeEnvironment === 'development'
             ? 'Admin@123'
-            : crypto.randomBytes(16).toString('hex') + 'Aa1!'; 
-            userData.password = password;
+            : crypto.randomBytes(16).toString('hex') + 'Aa1!';
+        userData.password = password;
         try {
             const user = new User(userData);
             await user.save();
@@ -39,9 +37,9 @@ const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
             user.password = password
             if (sendEmail) {
                 emailService.triggerEmail('verify-email', user, 'Verify Your Email')
-                .catch((err) => {
-                    logger.error(err)
-                })
+                    .catch((err) => {
+                        logger.error(err)
+                    })
             }
             resolve({ user: user.getPublicProfile() });
         } catch (error) {
@@ -62,7 +60,7 @@ const verifyEmail = (user) => {
     })
 }
 
-const resendVerificationEmail = (email, sendEmail=config.nodeMailer.activeStatus) => {
+const resendVerificationEmail = (email, sendEmail = config.nodeMailer.activeStatus) => {
     return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findOne({ email });
@@ -80,11 +78,11 @@ const resendVerificationEmail = (email, sendEmail=config.nodeMailer.activeStatus
             }
             const registrationToken = await user.generateRegistrationToken();
             user.registrationToken = registrationToken
-            if(sendEmail){
+            if (sendEmail) {
                 emailService.triggerEmail('verify-email', user, 'Verify Your Email')
-                .catch((err) => {
-                    console.error('Failed to send verification email:', err.message);
-                })
+                    .catch((err) => {
+                        console.error('Failed to send verification email:', err.message);
+                    })
             }
             resolve();
         } catch (error) {
@@ -180,7 +178,7 @@ const changePassword = (newPassword, user, sendEmail = config.nodeMailer.activeS
         }
     })
 }
-const resetPassword = (email, sendEmail = config.nodeMailer.activeStatus ) => {
+const resetPassword = (email, sendEmail = config.nodeMailer.activeStatus) => {
     return new Promise(async (resolve, reject) => {
         try {
             const user = await User.findOne({ email });
@@ -194,9 +192,9 @@ const resetPassword = (email, sendEmail = config.nodeMailer.activeStatus ) => {
             user.passwordResetToken = passwordResetToken;
             if (sendEmail) {
                 emailService.triggerEmail('reset-password', user, 'Reset Your Password')
-                .catch((err) => {
-                    console.error('Failed to send password reset email:', err.message);
-                })
+                    .catch((err) => {
+                        console.error('Failed to send password reset email:', err.message);
+                    })
             }
             resolve();
         } catch (error) {
@@ -216,15 +214,49 @@ const updateAllowBoxUser = (data) => {
     })
 }
 
-const deleteAllowBoxUser = (userData) => {    
+const deleteAllowBoxUser = (userData) => {
     const userId = userData.userId
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findByIdAndDelete({_id:userId});
-            if(!user){
-                return reject({statusCode: httpStatus.NOT_FOUND, message: "User not found"});
-            }            
+            const user = await User.findByIdAndDelete({ _id: userId });
+            if (!user) {
+                return reject({ statusCode: httpStatus.NOT_FOUND, message: "User not found" });
+            }
             resolve();
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+const markAttendance = (user) => {
+    return new Promise(async (resolve, reject) => {
+        const date = new Date();
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+        const now = new Date();
+
+        try {
+            const alreadyMarked = await Attendance.findOne({
+                userId: user._id,
+                createdAt: {
+                    $gte: startOfDay,
+                    $lte: endOfDay,
+                },
+            });
+
+            if (alreadyMarked) {
+                return reject({ statusCode: httpStatus.BAD_REQUEST, message: "Attendance already marked for today" });
+            }
+
+            const attendance = await new Attendance({
+                userId: user._id,
+                isPresent: true,
+                isHalfDay: now.getHours() >= 11
+            }).save();
+            resolve(attendance);
         } catch (error) {
             reject(error);
         }
@@ -241,5 +273,6 @@ module.exports = {
     resetPassword,
     resendVerificationEmail,
     updateAllowBoxUser,
-    deleteAllowBoxUser
+    deleteAllowBoxUser,
+    markAttendance
 };

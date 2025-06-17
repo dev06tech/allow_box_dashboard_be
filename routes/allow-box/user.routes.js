@@ -18,7 +18,6 @@ const {
   validateUserId
 } = require('../../middlewares/validations/allow-box/user.validations');
 
-
 const {
   userAuth,
   isRegisteredUser,
@@ -164,6 +163,15 @@ router.delete("/super-admin/delete-user", validateUserId, superAdminAuth, async 
     try {
         await userController.deleteAllowBoxUser(req.body);
         res.status(httpStatus.OK).send();
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.post("/mark-attendance", userAuth, async (req, res, next) => {
+    try {
+        const attendance = await userController.markAttendance(req.user);
+        res.status(httpStatus.OK).json(attendance);
     } catch (error) {
         next(error)
     }

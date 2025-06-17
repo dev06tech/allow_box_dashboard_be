@@ -13,18 +13,22 @@ const createSchool = (schoolData) => {
     })
 }
 
-const getAllowBoxSchools = (page, limit) => {
+const getAllowBoxSchools = (page, limit, searchQuery) => {
+     const filter = {};
+      if (searchQuery && searchQuery.trim() !== "") {
+        filter.name = { $regex: new RegExp(searchQuery, "i") };
+      }
     return new Promise(async (resolve, reject) => {
         try {
             const skip = (page - 1) * limit;
             const [schools, totalCount] = await Promise.all([
-                School.find()
+                School.find(filter)
                     .skip(skip)
                     .limit(limit)
                     .select('_id name pricipalName paymentStatus lastPaymentDate numberOfStudents subscriptionAmount subscriptionStartDate subscriptionEndDate')
                     .sort({ createdAt: -1 })
                     .lean(),
-                School.countDocuments()  // You had User.countDocuments() mistakenly here
+                School.countDocuments(filter)
             ]);
 
             resolve({

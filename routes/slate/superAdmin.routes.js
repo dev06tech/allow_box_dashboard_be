@@ -66,7 +66,7 @@ router.get("/logout", superAdminAuth, async (req, res, next) => {
 
 router.get("/dashboard", superAdminAuth, async (req, res, next) => {
     try {
-        const dashboardData = await slateSuperAdminController.getDashboardData();        
+        const dashboardData = await slateSuperAdminController.getDashboardData();
         res.status(httpStatus.OK).json(dashboardData);
     } catch (error) {
         next(error)
@@ -75,13 +75,13 @@ router.get("/dashboard", superAdminAuth, async (req, res, next) => {
 
 //alllowbox users related routes
 router.get("/allow-box-users", superAdminAuth, async (req, res, next) => {
-        const page = parseInt(req.query.page);
-        const limit = parseInt(req.query.limit);
-        if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
-            return res.status(httpStatus.BAD_REQUEST).json({
-                message: "Invalid pagination parameters. 'page' and 'limit' must be positive numbers."
-            });
-        }
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+        return res.status(httpStatus.BAD_REQUEST).json({
+            message: "Invalid pagination parameters. 'page' and 'limit' must be positive numbers."
+        });
+    }
     try {
         const result = await slateUserController.getAllowBoxUsers(page, limit);
         res.status(httpStatus.OK).json(result);
@@ -128,15 +128,19 @@ router.delete("/allow-box-users/delete", validateUserId, superAdminAuth, async (
 
 //allowbox schools related routes
 router.get("/allow-box-schools", superAdminAuth, async (req, res, next) => {
-        const page = parseInt(req.query.page);
-        const limit = parseInt(req.query.limit);
-        if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
-            return res.status(httpStatus.BAD_REQUEST).json({
-                message: "Invalid pagination parameters. 'page' and 'limit' must be positive numbers."
-            });
-        }
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+    const search = req.query.search || "";
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+        return res.status(httpStatus.BAD_REQUEST).json({
+            message: "Invalid pagination parameters. 'page' and 'limit' must be positive numbers."
+        });
+    }
     try {
-        const result = await allowBoxSchoolController.getAllowBoxSchools(page, limit);
+        const result = await allowBoxSchoolController.getAllowBoxSchools(page, limit, search);
+        if (result.totalSchools === 0) {
+            return res.status(httpStatus.NOT_FOUND).json({ message: "No schools found" });
+        }
         res.status(httpStatus.OK).json(result);
     } catch (error) {
         next(error);
@@ -145,7 +149,7 @@ router.get("/allow-box-schools", superAdminAuth, async (req, res, next) => {
 
 router.get("/allow-box-school/:schoolId", superAdminAuth, async (req, res, next) => {
     console.log(req.params);
-    
+
     try {
         const result = await allowBoxSchoolController.getAllowBoxSchool(req.params.schoolId);
         res.status(httpStatus.OK).json(result);

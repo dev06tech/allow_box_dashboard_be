@@ -74,6 +74,6 @@ schoolSchema.index({ createdAt: 1 });
 schoolSchema.index({ subscriptionStartDate: 1 });
 schoolSchema.index({ subscriptionEndDate: 1 });
 
-const School = mongoose.model("school", schoolSchema);
+const School = mongoose.model("School", schoolSchema);
 
 module.exports = School

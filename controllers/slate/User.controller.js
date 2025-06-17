@@ -3,6 +3,7 @@ const { default: httpStatus } = require('http-status');
 const config = require('../../config/config');
 
 const User = require('../../models/allow-box/user.model');
+const school = require('../../models/allow-box/school.model');
 const emailerService = require('../../services/mailsender.service')
 const generateOTP = () => {
     const min = 100000;
@@ -33,10 +34,10 @@ const createAllowBoxUser = (userData, sendEmail = config.nodeMailer.activeStatus
         }
     })
 }
-const updateAllowBoxUser = (userUpdates) => {
+const updateAllowBoxUser = (userUpdates) => {    
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findOneAndUpdate({ _id: userUpdates._id }, userUpdates, { new: true });
+            const user = await User.findOneAndUpdate({ _id: userUpdates._id }, userUpdates, { new: true });            
             resolve(user.getPublicProfile());
         } catch (error) {
             reject(error);
@@ -64,9 +65,11 @@ const getAllowBoxUsers = async (page, limit) => {
         const skip = (page - 1) * limit;
         const [users, totalCount] = await Promise.all([
             User.find()
-                .select('_id fullName email role associatedSchool').lean()
+                .select('_id fullName email role associatedSchool')
+                .populate('associatedSchool', 'name')
                 .skip(skip)
                 .limit(limit)
+                .sort({ createdAt: -1 })
                 .lean(),
             User.countDocuments()
         ]);

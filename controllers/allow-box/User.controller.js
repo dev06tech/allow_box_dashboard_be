@@ -236,8 +236,6 @@ const markAttendance = (user) => {
         startOfDay.setHours(0, 0, 0, 0);
         const endOfDay = new Date(date);
         endOfDay.setHours(23, 59, 59, 999);
-        const now = new Date();
-
         try {
             const alreadyMarked = await Attendance.findOne({
                 userId: user._id,
@@ -250,11 +248,13 @@ const markAttendance = (user) => {
             if (alreadyMarked) {
                 return reject({ statusCode: httpStatus.BAD_REQUEST, message: "Attendance already marked for today" });
             }
+            date.setHours(11, 0, 0, 0);
+            const now = new Date();
 
             const attendance = await new Attendance({
                 userId: user._id,
                 isPresent: true,
-                isHalfDay: now.getHours() >= 11
+                isHalfDay: now > date
             }).save();
             resolve(attendance);
         } catch (error) {

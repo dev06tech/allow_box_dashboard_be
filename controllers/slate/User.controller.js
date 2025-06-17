@@ -3,7 +3,6 @@ const { default: httpStatus } = require('http-status');
 const config = require('../../config/config');
 
 const User = require('../../models/allow-box/user.model');
-const school = require('../../models/allow-box/school.model');
 const emailerService = require('../../services/mailsender.service')
 const generateOTP = () => {
     const min = 100000;

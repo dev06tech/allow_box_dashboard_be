@@ -168,6 +168,41 @@ router.delete("/super-admin/delete-user", validateUserId, superAdminAuth, async 
     }
 })
 
+router.get("/get-users", userAuth, async (req, res, next) => {
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+    const search = req.query.search || "";
+    const allowedRoles = ["super-admin", "teacher", "support", "staff"];
+    const requesterRole = req.user.role;
+    
+    if(req.user.role && !allowedRoles.includes(req.user.role)) {
+        return res.status(httpStatus.FORBIDDEN).send({message: "Access Denied"})
+    }
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+        return res.status(httpStatus.BAD_REQUEST).json({
+            message: "Invalid pagination parameters. 'page' and 'limit' must be positive numbers."
+        });
+    }
+    try {
+        const result = await userController.getAllowBoxUsers(page, limit, search, requesterRole);        
+        if (result.totalUsers === 0) {
+            return res.status(httpStatus.NOT_FOUND).json({ message: "No users found" });
+        }
+        res.status(httpStatus.OK).json(result);
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.get("/get-user/:userId", userAuth, async (req, res, next) => {
+    try {
+        const result = await userController.getAllowBoxUser(req.params.userId);
+        res.status(httpStatus.OK).json(result);
+    } catch (error) {
+        next(error);
+    }
+});
+
 router.post("/mark-attendance", userAuth, async (req, res, next) => {
     try {
         const attendance = await userController.markAttendance(req.user);

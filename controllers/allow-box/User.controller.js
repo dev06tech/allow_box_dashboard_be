@@ -281,7 +281,6 @@ const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole) => {
     if (allowedRoles) {
         filter.role = { $in: allowedRoles };
     }
-    console.log(filter)
     try {
         const skip = (page - 1) * limit;
         const [users, totalCount] = await Promise.all([

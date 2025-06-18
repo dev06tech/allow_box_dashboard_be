@@ -263,6 +263,49 @@ const markAttendance = (user) => {
     })
 }
 
+const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole) => {
+    
+    const filter = {};
+    if (searchQuery && searchQuery.trim() !== "") {
+        filter.fullName = { $regex: new RegExp(searchQuery, "i") };
+    }
+    const roleVisibility = {
+        "super-admin": null,
+        "teacher": ["teacher", "student", "staff", "support", "parent"],
+        "support": ["teacher", "student", "staff", "support", "parent"],
+        "staff": ["teacher", "student", "staff", "parent"]
+    };
+
+    const allowedRoles = roleVisibility[requesterRole];
+
+    if (allowedRoles) {
+        filter.role = { $in: allowedRoles };
+    }
+    console.log(filter)
+    try {
+        const skip = (page - 1) * limit;
+        const [users, totalCount] = await Promise.all([
+            User.find(filter)
+                .select('_id fullName email role associatedSchool')
+                .populate('associatedSchool', 'name')
+                .skip(skip)
+                .limit(limit)
+                .sort({ createdAt: -1 })
+                .lean(),
+            User.countDocuments(filter)
+        ]);
+
+        return {
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / limit),
+            totalUsers: totalCount,
+            users,
+        };
+    } catch (error) {
+        throw error;
+    }
+};
+
 module.exports = {
     createUser,
     verifyEmail,
@@ -274,5 +317,6 @@ module.exports = {
     resendVerificationEmail,
     updateAllowBoxUser,
     deleteAllowBoxUser,
-    markAttendance
+    markAttendance,
+    getAllowBoxUsers
 };

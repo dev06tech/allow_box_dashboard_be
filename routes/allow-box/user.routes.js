@@ -195,8 +195,13 @@ router.get("/get-users", userAuth, async (req, res, next) => {
 });
 
 router.get("/get-user/:userId", userAuth, async (req, res, next) => {
+  const allowedRoles = ["super-admin", "teacher", "support", "staff"];
+    const requesterRole = req.user.role;
+    if(req.user.role && !allowedRoles.includes(req.user.role)) {
+        return res.status(httpStatus.FORBIDDEN).send({message: "Access Denied"})
+    }
     try {
-        const result = await userController.getAllowBoxUser(req.params.userId);
+        const result = await userController.getAllowBoxUser(req.params.userId, requesterRole);
         res.status(httpStatus.OK).json(result);
     } catch (error) {
         next(error);

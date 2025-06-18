@@ -91,7 +91,7 @@ const getAllowBoxUsers = async (page, limit, searchQuery) => {
 const getAllowBoxUser = async (userId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findById(userId);
+            const user = await User.findById(userId).populate('associatedSchool', 'name');
             if (!user) {
                 return reject({ statusCode: httpStatus.NOT_FOUND, message: "User not found" });
             }

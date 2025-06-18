@@ -264,7 +264,7 @@ const markAttendance = (user) => {
 }
 
 const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole) => {
-    
+
     const filter = {};
     if (searchQuery && searchQuery.trim() !== "") {
         filter.fullName = { $regex: new RegExp(searchQuery, "i") };
@@ -305,6 +305,32 @@ const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole) => {
     }
 };
 
+const getAllowBoxUser = (userId, requesterRole) => {
+    const roleVisibility = {
+        "super-admin": null,
+        "teacher": ["teacher", "student", "staff", "support", "parent"],
+        "support": ["teacher", "student", "staff", "support", "parent"],
+        "staff": ["teacher", "student", "staff", "parent"]
+    };
+
+    const allowedRoles = roleVisibility[requesterRole];
+    const filter = { _id: userId};
+    if (allowedRoles) {
+        filter.role = { $in: allowedRoles };
+    }
+    return new Promise(async (resolve, reject) => {
+        try {
+            const user = await User.findOne(filter).populate('associatedSchool', 'name');
+            if (!user) {
+                return reject({ statusCode: httpStatus.NOT_FOUND, message: "User not found" });
+            }
+            resolve(user.getPublicProfile());
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 module.exports = {
     createUser,
     verifyEmail,
@@ -317,5 +343,6 @@ module.exports = {
     updateAllowBoxUser,
     deleteAllowBoxUser,
     markAttendance,
-    getAllowBoxUsers
+    getAllowBoxUsers,
+    getAllowBoxUser
 };

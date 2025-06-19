@@ -16,6 +16,8 @@ const { superAdminAuth } = require("../../middlewares/slate/superAdminAuth");
 const slateSuperAdminController = require("../../controllers/slate/SuperAdmin.controller");
 const allowBoxSchoolController = require("../../controllers/slate/School.controller");
 const slateUserController = require("../../controllers/slate/User.controller");
+const emailerService = require('../../services/mailsender.service')
+
 
 router.post("/register", validateRegistration, async (req, res, next) => {
     const { fullName, email, password } = req.body;
@@ -164,4 +166,16 @@ router.get("/allow-box-school/:schoolId", superAdminAuth, async (req, res, next)
     }
 });
 
+router.get("/allow-box-school/trigger-pending-payment-email/:schoolId", superAdminAuth, async (req, res, next) => {
+    try {
+        const school = await allowBoxSchoolController.getAllowBoxSchool(req.params.schoolId);
+        if (!school) {
+            return res.status(httpStatus.NOT_FOUND).json({ message: "School not found" });
+        }
+        await emailerService.triggerEmail("school-payment-reminder", school, "Payment Reminder");
+        res.status(httpStatus.OK).json();
+    } catch (error) {
+        next(error);
+    }
+})
 module.exports = router;

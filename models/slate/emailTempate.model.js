@@ -13,7 +13,8 @@ var emailTemplateSchema = new mongoose.Schema({
       "new-teacher",
       "new-student",
       "new-parent",
-      "new-support"
+      "new-support",
+      "school-payment-reminder"
     ],
   },
   email: {

@@ -73,6 +73,16 @@ const triggerEmail = async (templateType, userData, subject) => {
         }
 
     }
+    if(templateType === 'school-payment-reminder'){
+        const emailTemplate = await emailTeamplateController.getEmailTemplate(templateType);
+        if (emailTemplate && emailTemplate.emailContent) {
+            emailContent = emailTemplate.emailContent;
+            emailContent = emailContent.replace("{{schoolName}}", userData.name);
+        }
+        else {
+            throw new Error(`Email template ${templateType} not found.`);
+        }
+    }
     const mailOptions = {
         from: config.nodeMailer.fromEmail,
         to: userData.email,

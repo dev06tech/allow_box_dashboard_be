@@ -135,13 +135,15 @@ router.get("/allow-box-schools", superAdminAuth, async (req, res, next) => {
     const page = parseInt(req.query.page);
     const limit = parseInt(req.query.limit);
     const search = req.query.search || "";
+    const paidStatus = req.query.paidStatus === "true"
+        ? true : (req.query.paidStatus === "false" ? false : undefined);
     if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
         return res.status(httpStatus.BAD_REQUEST).json({
             message: "Invalid pagination parameters. 'page' and 'limit' must be positive numbers."
         });
     }
     try {
-        const result = await allowBoxSchoolController.getAllowBoxSchools(page, limit, search);
+        const result = await allowBoxSchoolController.getAllowBoxSchools(page, limit, search, paidStatus);
         if (result.totalSchools === 0) {
             return res.status(httpStatus.NOT_FOUND).json({ message: "No schools found" });
         }

@@ -13,10 +13,13 @@ const createSchool = (schoolData) => {
     })
 }
 
-const getAllowBoxSchools = (page, limit, searchQuery) => {
+const getAllowBoxSchools = (page, limit, searchQuery, paidStatus) => {
      const filter = {};
       if (searchQuery && searchQuery.trim() !== "") {
         filter.name = { $regex: new RegExp(searchQuery, "i") };
+      }
+      if(paidStatus !== undefined){
+        filter.paymentStatus = paidStatus
       }
     return new Promise(async (resolve, reject) => {
         try {

@@ -1,10 +1,5 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const config = require("../../config/config");
-const logger = require("../../config/logger");
-const { default: httpStatus } = require("http-status");
 
 const studentDetailsSchema = new mongoose.Schema({
     studentId: {
@@ -50,6 +45,6 @@ const studentDetailsSchema = new mongoose.Schema({
 
 });
 
-const StudentDetails = mongoose.model("studentDetails", studentDetailsSchema);
+const StudentDetails = mongoose.model("StudentDetails", studentDetailsSchema);
 
 module.exports = StudentDetails;

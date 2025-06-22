@@ -174,7 +174,7 @@ router.get("/get-users", userAuth, async (req, res, next) => {
   const search = req.query.search || "";
   const allowedRoles = ["super-admin", "teacher", "support", "staff"];
   const requesterRole = req.user.role;
-
+  const requesterSchoolId = req.user.associatedSchool;
   if (req.user.role && !allowedRoles.includes(req.user.role)) {
     return res.status(httpStatus.FORBIDDEN).send({ message: "Access Denied" })
   }
@@ -184,7 +184,7 @@ router.get("/get-users", userAuth, async (req, res, next) => {
     });
   }
   try {
-    const result = await userController.getAllowBoxUsers(page, limit, search, requesterRole);
+    const result = await userController.getAllowBoxUsers(page, limit, search, requesterRole, requesterSchoolId);
     if (result.totalUsers === 0) {
       return res.status(httpStatus.NOT_FOUND).json({ message: "No users found" });
     }
@@ -197,11 +197,12 @@ router.get("/get-users", userAuth, async (req, res, next) => {
 router.get("/get-user/:userId", userAuth, async (req, res, next) => {
   const allowedRoles = ["super-admin", "teacher", "support", "staff"];
   const requesterRole = req.user.role;
+  const requesterSchoolId = req.user.associatedSchool;
   if (req.user.role && !allowedRoles.includes(req.user.role)) {
     return res.status(httpStatus.FORBIDDEN).send({ message: "Access Denied" })
   }
   try {
-    const result = await userController.getAllowBoxUser(req.params.userId, requesterRole);
+    const result = await userController.getAllowBoxUser(req.params.userId, requesterRole, requesterSchoolId);
     res.status(httpStatus.OK).json(result);
   } catch (error) {
     next(error);
@@ -210,6 +211,10 @@ router.get("/get-user/:userId", userAuth, async (req, res, next) => {
 
 router.post("/mark-attendance", userAuth, async (req, res, next) => {
   try {
+    const allowedRoles = ["super-admin", "teacher", "support", "staff"]
+    if (req.user.role && !allowedRoles.includes(req.user.role)) {
+      return res.status(httpStatus.FORBIDDEN).send({ message: "Access Denied" })
+    }
     const attendance = await userController.markAttendance(req.user);
     res.status(httpStatus.OK).json(attendance);
   } catch (error) {
@@ -217,6 +222,7 @@ router.post("/mark-attendance", userAuth, async (req, res, next) => {
   }
 })
 
+//this is a static api, need to make it dynamic
 router.get("/dashboard", userAuth, async (req, res, next) => {
   const allowedRoles = ["super-admin", /**"teacher", "support", "staff"*/];
   if (req.user.role && !allowedRoles.includes(req.user.role)) {
@@ -377,5 +383,6 @@ router.get("/dashboard", userAuth, async (req, res, next) => {
     next(error)
   }
 })
+
 
 module.exports = router;

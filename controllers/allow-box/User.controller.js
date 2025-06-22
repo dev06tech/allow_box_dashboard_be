@@ -263,11 +263,11 @@ const markAttendance = (user) => {
     })
 }
 
-const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole) => {
-
+const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole, requesterSchoolId) => {
     const filter = {};
     if (searchQuery && searchQuery.trim() !== "") {
         filter.fullName = { $regex: new RegExp(searchQuery, "i") };
+        filter.associatedSchool = requesterSchoolId
     }
     const roleVisibility = {
         "super-admin": null,
@@ -275,12 +275,11 @@ const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole) => {
         "support": ["teacher", "student", "staff", "support", "parent"],
         "staff": ["teacher", "student", "staff", "parent"]
     };
-
     const allowedRoles = roleVisibility[requesterRole];
-
     if (allowedRoles) {
         filter.role = { $in: allowedRoles };
-    }
+        filter.associatedSchool = requesterSchoolId
+    }    
     try {
         const skip = (page - 1) * limit;
         const [users, totalCount] = await Promise.all([
@@ -305,7 +304,7 @@ const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole) => {
     }
 };
 
-const getAllowBoxUser = (userId, requesterRole) => {
+const getAllowBoxUser = (userId, requesterRole, requesterSchoolId) => {
     const roleVisibility = {
         "super-admin": null,
         "teacher": ["teacher", "student", "staff", "support", "parent"],
@@ -314,7 +313,7 @@ const getAllowBoxUser = (userId, requesterRole) => {
     };
 
     const allowedRoles = roleVisibility[requesterRole];
-    const filter = { _id: userId};
+    const filter = { _id: userId, associatedSchool: requesterSchoolId };
     if (allowedRoles) {
         filter.role = { $in: allowedRoles };
     }

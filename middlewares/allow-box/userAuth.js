@@ -78,6 +78,9 @@ const userAuth = async (req, res, next) => {
         if (!user) {
             return res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
         }
+        if (!user.associatedSchool) {
+            return res.status(httpStatus.BAD_REQUEST).json({ message: 'User not associated with any school' });
+        }
         if(!user.isEmailVerified){
             return res.status(httpStatus.BAD_REQUEST).json({ message: 'Email not verified, Please verify your email' });
         }

@@ -11,6 +11,8 @@ const { validateSchoolRegistration,
     validateUserRoleData
 } = require('../../middlewares/validations/slate/user.validations');
 
+const { validateClass } = require('../../middlewares/validations/allow-box/class.validations');
+
 const { superAdminAuth } = require("../../middlewares/slate/superAdminAuth");
 
 const slateSuperAdminController = require("../../controllers/slate/SuperAdmin.controller");
@@ -76,6 +78,16 @@ router.get("/dashboard", superAdminAuth, async (req, res, next) => {
 })
 
 //alllowbox users related routes
+router.post("/allow-box-user", superAdminAuth, async (req, res, next) => {
+    const userData = req.body;
+    try {
+        const createdUser = await slateUserController.createAllowBoxUser(userData);
+        res.status(httpStatus.CREATED).json(createdUser);
+    } catch (error) {
+        next(error);
+    }
+})
+
 router.get("/allow-box-users", superAdminAuth, async (req, res, next) => {
     const page = parseInt(req.query.page);
     const limit = parseInt(req.query.limit);
@@ -174,6 +186,25 @@ router.get("/allow-box-school/trigger-pending-payment-email/:schoolId", superAdm
         }
         await emailerService.triggerEmail("school-payment-reminder", school, "Payment Reminder");
         res.status(httpStatus.OK).json();
+    } catch (error) {
+        next(error);
+    }
+})
+
+// allowbox classes related routes
+router.post("/allow-box-class", superAdminAuth, validateClass, async (req, res, next) => {
+    try {
+        const createdClass = await allowBoxSchoolController.createClass(req.body);
+        res.status(httpStatus.CREATED).json(createdClass);
+    } catch (error) {
+        next(error);
+    }
+})
+
+router.put("/allow-box-class/:classId", superAdminAuth, validateClass, async (req, res, next) => {
+    try {
+        const updatedClass = await allowBoxSchoolController.updateClass(req.params.classId, req.body);
+        res.status(httpStatus.OK).json(updatedClass);
     } catch (error) {
         next(error);
     }

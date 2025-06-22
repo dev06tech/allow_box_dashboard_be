@@ -1,5 +1,6 @@
 
 const School = require('../../models/allow-box/school.model');
+const Class = require('../../models/allow-box/class.model');
 
 const createSchool = (schoolData) => {
     return new Promise(async (resolve, reject) => {
@@ -14,13 +15,13 @@ const createSchool = (schoolData) => {
 }
 
 const getAllowBoxSchools = (page, limit, searchQuery, paidStatus) => {
-     const filter = {};
-      if (searchQuery && searchQuery.trim() !== "") {
+    const filter = {};
+    if (searchQuery && searchQuery.trim() !== "") {
         filter.name = { $regex: new RegExp(searchQuery, "i") };
-      }
-      if(paidStatus !== undefined){
+    }
+    if (paidStatus !== undefined) {
         filter.paymentStatus = paidStatus
-      }
+    }
     return new Promise(async (resolve, reject) => {
         try {
             const skip = (page - 1) * limit;
@@ -63,9 +64,33 @@ const getAllowBoxSchool = (id) => {
     })
 }
 
+const createClass = (classData) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const newClass = new Class(classData);
+            const created = await newClass.save();
+            resolve(created);
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+const updateClass = (id, classData) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const updated = await Class.findByIdAndUpdate(id, classData, { new: true });
+            resolve(updated);
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
 
 module.exports = {
     createSchool,
     getAllowBoxSchools,
-    getAllowBoxSchool
+    getAllowBoxSchool,
+    createClass,
+    updateClass
 }

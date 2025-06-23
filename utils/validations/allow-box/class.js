@@ -3,15 +3,13 @@ const mongoose = require('mongoose');
 
 const classSchema = Joi.object({
     name: Joi.string()
-        .pattern(/^[IVXLCDM]+$/) // Roman numerals only
-        .uppercase()
+        .pattern(/^[IVXLCDM]+$/) 
         .required()
         .messages({
             "string.pattern.base": "Class name must be in Roman numerals (e.g., I, II, III, IV...)",
             "string.uppercase": "Class name must be in uppercase",
         }),
     division: Joi.string()
-        .uppercase()
         .pattern(/^[A-Z]+$/)
         .required()
         .messages({

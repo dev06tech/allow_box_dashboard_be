@@ -15,6 +15,8 @@ const ApiError = require("./utils/ApiError");
 //Routes
 const userRoutes = require('./routes/allow-box/user.routes');
 const superAdminRoutes = require('./routes/slate/superAdmin.routes');
+const schoolRoutes = require('./routes/slate/school.routes');
+const classRoutes = require('./routes/slate/class.routes');
 const emailTemplateRoutes = require('./routes/slate/emailTemplates.routes');
 
 const app = express();
@@ -71,6 +73,8 @@ if (config.env === "production") {
 
 app.use("/api/allow-box/user", userRoutes);
 app.use("/api/slate/super-admin", superAdminRoutes);
+app.use("/api/slate/school", schoolRoutes);
+app.use("/api/slate/class", classRoutes);
 app.use("/api/slate/email-template", emailTemplateRoutes);
 
 app.get('/', (req, res) => {

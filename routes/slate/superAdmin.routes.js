@@ -209,4 +209,35 @@ router.put("/allow-box-class/:classId", superAdminAuth, validateClass, async (re
         next(error);
     }
 })
+
+router.get("/allow-box-classes/:schoolId", superAdminAuth, async (req, res, next) => {
+    const page = parseInt(req.query.page);
+    const limit = parseInt(req.query.limit);
+    const search = req.query.search || "";
+    if (isNaN(page) || isNaN(limit) || page <= 0 || limit <= 0) {
+        return res.status(httpStatus.BAD_REQUEST).json({
+            message: "Invalid pagination parameters. 'page' and 'limit' must be positive numbers."
+        });
+    }
+    try {
+        const classes = await allowBoxSchoolController.getClassesBySchool(req.params.schoolId, page, limit, search);
+        console.log(classes);
+        
+        if (classes.totalClasses === 0) {
+            return res.status(httpStatus.NOT_FOUND).json({ message: "No classes found" });
+        }
+        res.status(httpStatus.OK).json(classes);
+    } catch (error) {
+        next(error);
+    }
+})
+
+router.delete("/allow-box-class/:classId", superAdminAuth, async (req, res, next) => {
+    try {
+        await allowBoxSchoolController.deleteClass(req.params.classId);
+        res.status(httpStatus.OK).send();
+    } catch (error) {
+        next(error);
+    }
+})
 module.exports = router;

@@ -87,10 +87,57 @@ const updateClass = (id, classData) => {
     })
 }
 
+const getClassesBySchool = (schoolId, page, limit, search) => {
+    let filter = {
+        associatedSchool: schoolId
+    };
+    if (search && search.trim() !== "") {
+        filter.name = { $regex: new RegExp(search, "i") };
+    }
+    console.log(filter);
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            const skip = (page - 1) * limit;
+            const [classes, totalCount] = await Promise.all([
+                Class.find(filter)
+                    .skip(skip)
+                    .limit(limit)
+                    .lean(),
+                Class.countDocuments(filter)
+            ]);
+            resolve({
+                currentPage: page,
+                totalPages: Math.ceil(totalCount / limit),
+                totalClasses: totalCount,
+                classes
+            });
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+const deleteClass = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const deletedClass = await Class.findByIdAndDelete(id);
+            if (!deletedClass) {
+                return reject({ statusCode: httpStatus.NOT_FOUND, message: "Class not found" });
+            }
+            resolve();
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 module.exports = {
     createSchool,
     getAllowBoxSchools,
     getAllowBoxSchool,
     createClass,
-    updateClass
+    updateClass,
+    getClassesBySchool,
+    deleteClass
 }

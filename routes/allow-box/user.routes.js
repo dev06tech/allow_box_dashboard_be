@@ -139,7 +139,7 @@ router.put("/reset-password", resetPasswordAuth, validateChangePassword, async (
   }
 })
 
-router.post("/super-admin/add-new-user", validateNewUser, superAdminAuth, async (req, res, next) => {
+router.post("/add-new-user", validateNewUser, superAdminAuth, async (req, res, next) => {
   const userData = req.body;
   userData.registeredVia = "allow-box";
   try {
@@ -150,7 +150,7 @@ router.post("/super-admin/add-new-user", validateNewUser, superAdminAuth, async 
   }
 })
 
-router.put("/super-admin/update-user", validateUserUpdate, superAdminAuth, async (req, res, next) => {
+router.put("/update-user", validateUserUpdate, superAdminAuth, async (req, res, next) => {
   try {
     const user = await userController.updateAllowBoxUser(req.body);
     res.status(httpStatus.OK).json(user);
@@ -159,7 +159,7 @@ router.put("/super-admin/update-user", validateUserUpdate, superAdminAuth, async
   }
 })
 
-router.delete("/super-admin/delete-user", validateUserId, superAdminAuth, async (req, res, next) => {
+router.delete("/delete-user", validateUserId, superAdminAuth, async (req, res, next) => {
   try {
     await userController.deleteAllowBoxUser(req.body);
     res.status(httpStatus.OK).send();

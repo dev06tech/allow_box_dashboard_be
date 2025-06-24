@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const ClassSchema = new mongoose.Schema({
+const classSchema = new mongoose.Schema({
     name: {
         type: String
     },
@@ -15,12 +15,6 @@ const ClassSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    students: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Student'
-        }
-    ],
     subjects: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -32,8 +26,8 @@ const ClassSchema = new mongoose.Schema({
         required: true
     }
 });
-ClassSchema.set("timestamps", true);
+classSchema.set("timestamps", true);
 
-ClassSchema.index({ _id: 1 });
+classSchema.index({ _id: 1 });
 
-module.exports = mongoose.model("Class", ClassSchema);
+module.exports = mongoose.model("Class", classSchema);

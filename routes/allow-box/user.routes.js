@@ -29,9 +29,9 @@ const { superAdminAuth } = require("../../middlewares/allow-box/superAdminAuth")
 const userController = require("../../controllers/allow-box/User.controller");
 
 router.post("/register", validateRegistration, async (req, res, next) => {
-  const { fullName, email, password } = req.body;
+  const { fullName, email, password, phoneNumber } = req.body;
   try {
-    const user = await userController.createUser({ fullName, email, password });
+    const user = await userController.createUser({ fullName, email, password, phoneNumber });
     res.status(httpStatus.CREATED).json(user);
   } catch (error) {
     next(error)

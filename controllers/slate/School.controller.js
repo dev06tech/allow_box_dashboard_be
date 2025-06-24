@@ -1,3 +1,4 @@
+const { default: httpStatus } = require('http-status');
 
 const School = require('../../models/allow-box/school.model');
 
@@ -14,13 +15,13 @@ const createSchool = (schoolData) => {
 }
 
 const getAllowBoxSchools = (page, limit, searchQuery, paidStatus) => {
-     const filter = {};
-      if (searchQuery && searchQuery.trim() !== "") {
+    const filter = {};
+    if (searchQuery && searchQuery.trim() !== "") {
         filter.name = { $regex: new RegExp(searchQuery, "i") };
-      }
-      if(paidStatus !== undefined){
+    }
+    if (paidStatus !== undefined) {
         filter.paymentStatus = paidStatus
-      }
+    }
     return new Promise(async (resolve, reject) => {
         try {
             const skip = (page - 1) * limit;
@@ -63,9 +64,38 @@ const getAllowBoxSchool = (id) => {
     })
 }
 
+const updateAllowBoxSchool = (id, schoolData) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const updated = await School.findByIdAndUpdate(id, schoolData, { new: true });
+            resolve(updated);
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
+const deleteAllowBoxSchool = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const deleted = await School.findByIdAndDelete(id);
+            if (!deleted) {
+                return reject({
+                    statusCode: httpStatus.NOT_FOUND,
+                    message: "School Not found"
+                });
+            }
+            resolve();
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
 
 module.exports = {
     createSchool,
     getAllowBoxSchools,
-    getAllowBoxSchool
+    getAllowBoxSchool,
+    updateAllowBoxSchool,
+    deleteAllowBoxSchool
 }

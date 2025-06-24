@@ -78,20 +78,12 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "School"
     },
-    attendance: [{
-        date: {
-            type: Date,
-        },
-        isPresent: {
-            type: Boolean
-        },
-        isHalfDay: {
-            type: Boolean
-        }
-    }],
     isBlocked: {
         type: Boolean,
         default: false
+    },
+    phoneNumber: {
+        type: String,   
     }
 });
 

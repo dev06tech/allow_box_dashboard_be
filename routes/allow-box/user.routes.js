@@ -29,9 +29,9 @@ const { superAdminAuth } = require("../../middlewares/allow-box/superAdminAuth")
 const userController = require("../../controllers/allow-box/User.controller");
 
 router.post("/register", validateRegistration, async (req, res, next) => {
-  const { fullName, email, password } = req.body;
+  const { fullName, email, password, phoneNumber } = req.body;
   try {
-    const user = await userController.createUser({ fullName, email, password });
+    const user = await userController.createUser({ fullName, email, password, phoneNumber });
     res.status(httpStatus.CREATED).json(user);
   } catch (error) {
     next(error)
@@ -139,7 +139,7 @@ router.put("/reset-password", resetPasswordAuth, validateChangePassword, async (
   }
 })
 
-router.post("/super-admin/add-new-user", validateNewUser, superAdminAuth, async (req, res, next) => {
+router.post("/add-new-user", validateNewUser, superAdminAuth, async (req, res, next) => {
   const userData = req.body;
   userData.registeredVia = "allow-box";
   try {
@@ -150,7 +150,7 @@ router.post("/super-admin/add-new-user", validateNewUser, superAdminAuth, async 
   }
 })
 
-router.put("/super-admin/update-user", validateUserUpdate, superAdminAuth, async (req, res, next) => {
+router.put("/update-user", validateUserUpdate, superAdminAuth, async (req, res, next) => {
   try {
     const user = await userController.updateAllowBoxUser(req.body);
     res.status(httpStatus.OK).json(user);
@@ -159,7 +159,7 @@ router.put("/super-admin/update-user", validateUserUpdate, superAdminAuth, async
   }
 })
 
-router.delete("/super-admin/delete-user", validateUserId, superAdminAuth, async (req, res, next) => {
+router.delete("/delete-user", validateUserId, superAdminAuth, async (req, res, next) => {
   try {
     await userController.deleteAllowBoxUser(req.body);
     res.status(httpStatus.OK).send();
@@ -174,7 +174,7 @@ router.get("/get-users", userAuth, async (req, res, next) => {
   const search = req.query.search || "";
   const allowedRoles = ["super-admin", "teacher", "support", "staff"];
   const requesterRole = req.user.role;
-
+  const requesterSchoolId = req.user.associatedSchool;
   if (req.user.role && !allowedRoles.includes(req.user.role)) {
     return res.status(httpStatus.FORBIDDEN).send({ message: "Access Denied" })
   }
@@ -184,7 +184,7 @@ router.get("/get-users", userAuth, async (req, res, next) => {
     });
   }
   try {
-    const result = await userController.getAllowBoxUsers(page, limit, search, requesterRole);
+    const result = await userController.getAllowBoxUsers(page, limit, search, requesterRole, requesterSchoolId);
     if (result.totalUsers === 0) {
       return res.status(httpStatus.NOT_FOUND).json({ message: "No users found" });
     }
@@ -197,11 +197,12 @@ router.get("/get-users", userAuth, async (req, res, next) => {
 router.get("/get-user/:userId", userAuth, async (req, res, next) => {
   const allowedRoles = ["super-admin", "teacher", "support", "staff"];
   const requesterRole = req.user.role;
+  const requesterSchoolId = req.user.associatedSchool;
   if (req.user.role && !allowedRoles.includes(req.user.role)) {
     return res.status(httpStatus.FORBIDDEN).send({ message: "Access Denied" })
   }
   try {
-    const result = await userController.getAllowBoxUser(req.params.userId, requesterRole);
+    const result = await userController.getAllowBoxUser(req.params.userId, requesterRole, requesterSchoolId);
     res.status(httpStatus.OK).json(result);
   } catch (error) {
     next(error);
@@ -210,6 +211,10 @@ router.get("/get-user/:userId", userAuth, async (req, res, next) => {
 
 router.post("/mark-attendance", userAuth, async (req, res, next) => {
   try {
+    const allowedRoles = ["super-admin", "teacher", "support", "staff"]
+    if (req.user.role && !allowedRoles.includes(req.user.role)) {
+      return res.status(httpStatus.FORBIDDEN).send({ message: "Access Denied" })
+    }
     const attendance = await userController.markAttendance(req.user);
     res.status(httpStatus.OK).json(attendance);
   } catch (error) {
@@ -217,6 +222,7 @@ router.post("/mark-attendance", userAuth, async (req, res, next) => {
   }
 })
 
+//this is a static api, need to make it dynamic
 router.get("/dashboard", userAuth, async (req, res, next) => {
   const allowedRoles = ["super-admin", /**"teacher", "support", "staff"*/];
   if (req.user.role && !allowedRoles.includes(req.user.role)) {
@@ -377,5 +383,6 @@ router.get("/dashboard", userAuth, async (req, res, next) => {
     next(error)
   }
 })
+
 
 module.exports = router;

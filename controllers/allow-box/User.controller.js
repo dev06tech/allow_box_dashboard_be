@@ -6,6 +6,7 @@ const googleAuthService = require("../../services/google.service")
 const { default: httpStatus } = require("http-status")
 const crypto = require("crypto")
 const emailService = require("../../services/mailsender.service")
+const roleVisibility = require("../../utils/roleVisibility")
 
 // const checkIsSuperAdminEmail = (email) => {
 //     //super admin and admin roles can only access 
@@ -41,7 +42,7 @@ const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
                         logger.error(err)
                     })
             }
-            resolve({ user: user.getPublicProfile() });
+            resolve( user.getPublicProfile() );
         } catch (error) {
             reject(error);
         }
@@ -269,17 +270,11 @@ const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole, request
         filter.fullName = { $regex: new RegExp(searchQuery, "i") };
         filter.associatedSchool = requesterSchoolId
     }
-    const roleVisibility = {
-        "super-admin": null,
-        "teacher": ["teacher", "student", "staff", "support", "parent"],
-        "support": ["teacher", "student", "staff", "support", "parent"],
-        "staff": ["teacher", "student", "staff", "parent"]
-    };
     const allowedRoles = roleVisibility[requesterRole];
     if (allowedRoles) {
         filter.role = { $in: allowedRoles };
         filter.associatedSchool = requesterSchoolId
-    }    
+    }
     try {
         const skip = (page - 1) * limit;
         const [users, totalCount] = await Promise.all([
@@ -305,13 +300,6 @@ const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole, request
 };
 
 const getAllowBoxUser = (userId, requesterRole, requesterSchoolId) => {
-    const roleVisibility = {
-        "super-admin": null,
-        "teacher": ["teacher", "student", "staff", "support", "parent"],
-        "support": ["teacher", "student", "staff", "support", "parent"],
-        "staff": ["teacher", "student", "staff", "parent"]
-    };
-
     const allowedRoles = roleVisibility[requesterRole];
     const filter = { _id: userId, associatedSchool: requesterSchoolId };
     if (allowedRoles) {

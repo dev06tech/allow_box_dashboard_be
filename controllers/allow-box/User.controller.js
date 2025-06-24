@@ -245,7 +245,6 @@ const markAttendance = (user) => {
                     $lte: endOfDay,
                 },
             });
-
             if (alreadyMarked) {
                 return reject({ statusCode: httpStatus.BAD_REQUEST, message: "Attendance already marked for today" });
             }

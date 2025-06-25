@@ -28,6 +28,4 @@ const classSchema = new mongoose.Schema({
 });
 classSchema.set("timestamps", true);
 
-classSchema.index({ _id: 1 });
-
 module.exports = mongoose.model("Class", classSchema);

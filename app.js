@@ -14,9 +14,11 @@ const ApiError = require("./utils/ApiError");
 
 //Routes
 const userRoutes = require('./routes/allow-box/user.routes');
+const classRoutesAllowBox = require('./routes/allow-box/class.routes');
+const schoolRoutesAllowBox = require('./routes/allow-box/school.routes');
 const superAdminRoutes = require('./routes/slate/superAdmin.routes');
-const schoolRoutes = require('./routes/slate/school.routes');
-const classRoutes = require('./routes/slate/class.routes');
+const schoolRoutesSlate = require('./routes/slate/school.routes');
+const classRoutesSlate = require('./routes/slate/class.routes');
 const emailTemplateRoutes = require('./routes/slate/emailTemplates.routes');
 
 const app = express();
@@ -72,9 +74,11 @@ if (config.env === "production") {
 }
 
 app.use("/api/allow-box/user", userRoutes);
+app.use("/api/allow-box/class", classRoutesAllowBox);
+app.use("/api/allow-box/school", schoolRoutesAllowBox);
 app.use("/api/slate/super-admin", superAdminRoutes);
-app.use("/api/slate/school", schoolRoutes);
-app.use("/api/slate/class", classRoutes);
+app.use("/api/slate/school", schoolRoutesSlate);
+app.use("/api/slate/class", classRoutesSlate);
 app.use("/api/slate/email-template", emailTemplateRoutes);
 
 app.get('/', (req, res) => {
@@ -83,7 +87,7 @@ app.get('/', (req, res) => {
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, "Not found"));
+  next( new ApiError(httpStatus.NOT_FOUND, "Not found"));
 });
 
 // convert error to ApiError, if needed

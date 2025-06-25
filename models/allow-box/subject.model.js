@@ -15,7 +15,11 @@ const subjectSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
-    }
+    },
+    substituteTeacher: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
 });
 
 subjectSchema.set("timestamps", true);

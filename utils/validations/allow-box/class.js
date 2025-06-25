@@ -4,14 +4,14 @@ const mongoose = require('mongoose');
 const classSchema = Joi.object({
     name: Joi.string()
         .pattern(/^[IVXLCDM]+$/) 
-        .required()
+        .optional()
         .messages({
             "string.pattern.base": "Class name must be in Roman numerals (e.g., I, II, III, IV...)",
             "string.uppercase": "Class name must be in uppercase",
         }),
     division: Joi.string()
         .pattern(/^[A-Z]+$/)
-        .required()
+        .optional()
         .messages({
             "string.pattern.base": "Division must contain only uppercase letters (A-Z)",
             "string.uppercase": "Division must be in uppercase",
@@ -23,7 +23,7 @@ const classSchema = Joi.object({
             }
             return value;
         })
-        .required(),
+        .optional(),
     associatedSchool: Joi.string()
         .custom((value, helpers) => {
             if (!mongoose.Types.ObjectId.isValid(value)) {
@@ -31,7 +31,7 @@ const classSchema = Joi.object({
             }
             return value;
         })
-        .required(),
+        .optional(),
     students: Joi.array()
         .items(
             Joi.string().custom((value, helpers) => {

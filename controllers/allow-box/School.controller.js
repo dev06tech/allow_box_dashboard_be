@@ -41,7 +41,25 @@ const getSchoolByIdAndAddSuperAdmin = (id, data) => {
     })
 }
 
+const updateSchool = (id, data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const school = await School.findByIdAndUpdate(id, data, { new: true });
+            if (!school) {
+                return reject({
+                    statusCode: httpStatus.NOT_FOUND,
+                    message: "School Not found"
+                });
+            }
+            resolve(school);
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
+
 module.exports = {
     getSchoolById,
-    getSchoolByIdAndAddSuperAdmin
+    getSchoolByIdAndAddSuperAdmin,
+    updateSchool
 }

@@ -126,7 +126,7 @@ const addGrowthPercentage = (incomingData) => {
 const getDashboardData = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const [userStatusResult, schoolStatsResult] = await Promise.all([
+            const [userStatusResult, schoolStatsResult, schoolCount] = await Promise.all([
                 User.aggregate([
                     {
                         $match: {
@@ -330,10 +330,13 @@ const getDashboardData = () => {
                             }
                         }
                     }
-                ])
+                ]),
+
+                School.countDocuments()
             ]);
             let schoolStats = schoolStatsResult[0];
             schoolStats.monthlyRevenueOverview = addGrowthPercentage(schoolStats);
+            schoolStats.totalSchoolCount = schoolCount
             resolve({ userStatus: userStatusResult[0], schoolStats: schoolStatsResult[0] });
         } catch (error) {
             reject(error);

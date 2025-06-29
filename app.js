@@ -16,6 +16,7 @@ const ApiError = require("./utils/ApiError");
 const userRoutes = require('./routes/allow-box/user.routes');
 const classRoutesAllowBox = require('./routes/allow-box/class.routes');
 const schoolRoutesAllowBox = require('./routes/allow-box/school.routes');
+const studentRoutesAllowBox = require('./routes/allow-box/student.routes');
 const superAdminRoutes = require('./routes/slate/superAdmin.routes');
 const schoolRoutesSlate = require('./routes/slate/school.routes');
 const classRoutesSlate = require('./routes/slate/class.routes');
@@ -76,6 +77,7 @@ if (config.env === "production") {
 app.use("/api/allow-box/user", userRoutes);
 app.use("/api/allow-box/class", classRoutesAllowBox);
 app.use("/api/allow-box/school", schoolRoutesAllowBox);
+app.use("/api/allow-box/student", studentRoutesAllowBox);
 app.use("/api/slate/super-admin", superAdminRoutes);
 app.use("/api/slate/school", schoolRoutesSlate);
 app.use("/api/slate/class", classRoutesSlate);

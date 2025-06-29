@@ -1,6 +1,7 @@
 const { default: httpStatus } = require('http-status');
 const { studentDetailsSchema } = require('../../../utils/validations/allow-box/studentDetails');
 
+const { studentsAttendanceSchema } = require('../../../utils/validations/allow-box/attendance');
 const validatestudentDetails = (req, res, next) => {
     const { error } = studentDetailsSchema.validate(req.body);
     if (error) {

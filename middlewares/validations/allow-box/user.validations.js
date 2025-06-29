@@ -10,6 +10,11 @@ const {
     validateUserSchema
 } = require('../../../utils/validations/allow-box/users');
 
+const {
+    studentsAttendanceSchema
+} = require('../../../utils/validations/allow-box/attendance');
+
+
 const validateRegistration = (req, res, next) => {
     const { error } = registrationSchema.validate(req.body);
     if (error) {
@@ -74,6 +79,15 @@ const validateUserId = (req, res, next) => {
     }
     next();
 };
+
+const validateStudentsAttendance = (req, res, next) => {
+    const { error } = studentsAttendanceSchema.validate(req.body);
+    if (error) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: error.details[0].message });
+    }
+    next();
+}
+
 module.exports = {
     validateRegistration,
     validateEmailVerification,
@@ -82,5 +96,6 @@ module.exports = {
     validateResetPassword,
     validateNewUser,
     validateUserUpdate,
-    validateUserId
+    validateUserId,
+    validateStudentsAttendance
 };

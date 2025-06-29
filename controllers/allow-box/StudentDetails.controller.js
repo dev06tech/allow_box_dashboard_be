@@ -22,9 +22,7 @@ const createStudentDetails = async (requester, studentData) => {
     }
 };
 
-const updateStudentDetails = async (requester, studentData) => {
-    console.log(studentData);
-    
+const updateStudentDetails = async (requester, studentData) => {    
     try {
         const isValidStudent = await User.findOne({
             _id: studentData.studentId,

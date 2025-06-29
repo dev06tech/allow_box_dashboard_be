@@ -264,15 +264,15 @@ const markAttendance = (user) => {
 }
 
 const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole, requesterSchoolId) => {
-    const filter = {};
+    const filter = {
+        associatedSchool: requesterSchoolId
+    };
     if (searchQuery && searchQuery.trim() !== "") {
         filter.fullName = { $regex: new RegExp(searchQuery, "i") };
-        filter.associatedSchool = requesterSchoolId
     }
     const allowedRoles = roleVisibility[requesterRole];
     if (allowedRoles) {
         filter.role = { $in: allowedRoles };
-        filter.associatedSchool = requesterSchoolId
     }
     try {
         const skip = (page - 1) * limit;

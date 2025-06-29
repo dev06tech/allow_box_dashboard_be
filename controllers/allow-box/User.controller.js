@@ -2,11 +2,14 @@ const config = require("../../config/config")
 const logger = require("../../config/logger")
 const User = require("../../models/allow-box/user.model")
 const Attendance = require("../../models/allow-box/attendance.model")
+const Class = require("../../models/allow-box/class.model")
+const StudentDetails = require("../../models/allow-box/studentDetails.model")
 const googleAuthService = require("../../services/google.service")
 const { default: httpStatus } = require("http-status")
 const crypto = require("crypto")
 const emailService = require("../../services/mailsender.service")
 const roleVisibility = require("../../utils/roleVisibility")
+const ApiError = require("../../utils/ApiError")
 
 // const checkIsSuperAdminEmail = (email) => {
 //     //super admin and admin roles can only access 
@@ -42,7 +45,7 @@ const createUser = (userData, sendEmail = config.nodeMailer.activeStatus) => {
                         logger.error(err)
                     })
             }
-            resolve( user.getPublicProfile() );
+            resolve(user.getPublicProfile());
         } catch (error) {
             reject(error);
         }
@@ -263,6 +266,49 @@ const markAttendance = (user) => {
     })
 }
 
+    const markClassAttendance = async ({ user, attendanceList }) => {
+        const classData = await Class.findOne({classTeacher:user._id, associatedSchool:user.associatedSchool});
+        console.log(classData);
+        
+        if (!classData) {
+            throw new ApiError (httpStatus.NOT_FOUND, "Class not found");
+        }
+        if (String(classData.classTeacher) !== String(user._id)) {
+            throw new ApiError(httpStatus.FORBIDDEN, "You are not authorized to mark attendance for this class");
+        }
+        const validStudents = await StudentDetails.find({ currentClass: classData._id }).select('studentId');
+        const validStudentIds = new Set(validStudents.map(s => String(s.studentId)));
+        const attendanceToInsert = [];
+        const now = new Date();
+        const isHalfDay = false;
+
+        for (const { studentId, isPresent } of attendanceList) {
+            if (!validStudentIds.has(String(studentId))) {
+                throw new ApiError(httpStatus.BAD_REQUEST, `Student ${studentId} does not belong to this class`);
+            }
+
+            attendanceToInsert.push({
+                userId: studentId,
+                isPresent,
+                isHalfDay,
+                createdAt: now,
+                updatedAt: now
+            });
+        }
+
+        const inserted = await Attendance.insertMany(attendanceToInsert);
+
+        return {
+            message: "Attendance marked successfully",
+            attendanceListLength: attendanceList.length,
+            totalMarked: attendanceToInsert.length,
+            markedAttendance: inserted
+        };
+    };
+
+
+
+
 const getAllowBoxUsers = async (page, limit, searchQuery, requesterRole, requesterSchoolId) => {
     const filter = {
         associatedSchool: requesterSchoolId
@@ -310,7 +356,12 @@ const getAllowBoxUser = (userId, requesterRole, requesterSchoolId) => {
             if (!user) {
                 return reject({ statusCode: httpStatus.NOT_FOUND, message: "User not found" });
             }
-            resolve(user.getPublicProfile());
+            const publicProfile = user.getPublicProfile();
+            if(user.role === 'student'){
+                const studentDetails = await StudentDetails.findOne({studentId:user._id});
+                publicProfile.studentDetails = studentDetails
+            }
+            resolve(publicProfile);
         } catch (error) {
             reject(error);
         }
@@ -330,5 +381,6 @@ module.exports = {
     deleteAllowBoxUser,
     markAttendance,
     getAllowBoxUsers,
-    getAllowBoxUser
+    getAllowBoxUser,
+    markClassAttendance
 };

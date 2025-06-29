@@ -15,7 +15,8 @@ const {
   validateResetPassword,
   validateNewUser,
   validateUserUpdate,
-  validateUserId
+  validateUserId,
+  validateStudentsAttendance
 } = require('../../middlewares/validations/allow-box/user.validations');
 
 const {
@@ -221,6 +222,30 @@ router.post("/mark-attendance", userAuth, async (req, res, next) => {
     next(error)
   }
 })
+
+router.post("/mark-class-attendance", validateStudentsAttendance, userAuth, async (req, res, next) => {
+  try {
+    const allowedRoles = ["super-admin", "teacher"];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(httpStatus.FORBIDDEN).json({ message: "Access Denied" });
+    }
+
+    const { attendance } = req.body;
+
+    if (!Array.isArray(attendance)) {
+      return res.status(httpStatus.BAD_REQUEST).json({ message: "Invalid data" });
+    }
+
+    const result = await userController.markClassAttendance({
+      user:req.user,
+      attendanceList: attendance
+    });
+
+    res.status(httpStatus.OK).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
 
 //this is a static api, need to make it dynamic
 router.get("/dashboard", userAuth, async (req, res, next) => {

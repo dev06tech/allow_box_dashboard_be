@@ -1,12 +1,11 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
-const { applyTimestamps } = require("./user.model");
 
 const studentDetailsSchema = new mongoose.Schema({
     studentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
+        unique: true  
     },
     currentClass: {
         type: mongoose.Schema.Types.ObjectId,

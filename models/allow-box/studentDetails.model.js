@@ -79,11 +79,11 @@ const studentDetailsSchema = new mongoose.Schema({
     ],
 
 });
-StudentDetails.set("timestamps", true);
+studentDetailsSchema.set("timestamps", true);
 
-StudentDetails.index({ studentId: 1 });
-StudentDetails.index({ class: 1 });
-StudentDetails.index({ parentId: 1 });
+studentDetailsSchema.index({ studentId: 1 });
+studentDetailsSchema.index({ class: 1 });
+studentDetailsSchema.index({ parentId: 1 });
 
 const StudentDetails = mongoose.model("StudentDetails", studentDetailsSchema);
 

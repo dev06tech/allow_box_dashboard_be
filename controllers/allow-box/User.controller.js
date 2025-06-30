@@ -10,6 +10,7 @@ const crypto = require("crypto")
 const emailService = require("../../services/mailsender.service")
 const roleVisibility = require("../../utils/roleVisibility")
 const ApiError = require("../../utils/ApiError")
+const { log } = require("console")
 
 // const checkIsSuperAdminEmail = (email) => {
 //     //super admin and admin roles can only access 
@@ -207,10 +208,10 @@ const resetPassword = (email, sendEmail = config.nodeMailer.activeStatus) => {
     })
 }
 
-const updateAllowBoxUser = (data) => {
+const updateAllowBoxUser = (data) => {    
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findOneAndUpdate({ _id: data._id }, data, { new: true });
+            const user = await User.findOneAndUpdate({ _id: data._id }, data, { new: true });           
             resolve(user.getPublicProfile());
         } catch (error) {
             reject(error);
@@ -267,9 +268,7 @@ const markAttendance = (user) => {
 }
 
     const markClassAttendance = async ({ user, attendanceList }) => {
-        const classData = await Class.findOne({classTeacher:user._id, associatedSchool:user.associatedSchool});
-        console.log(classData);
-        
+        const classData = await Class.findOne({classTeacher:user._id, associatedSchool:user.associatedSchool});        
         if (!classData) {
             throw new ApiError (httpStatus.NOT_FOUND, "Class not found");
         }
@@ -281,7 +280,6 @@ const markAttendance = (user) => {
         const attendanceToInsert = [];
         const now = new Date();
         const isHalfDay = false;
-
         for (const { studentId, isPresent } of attendanceList) {
             if (!validStudentIds.has(String(studentId))) {
                 throw new ApiError(httpStatus.BAD_REQUEST, `Student ${studentId} does not belong to this class`);
@@ -295,9 +293,7 @@ const markAttendance = (user) => {
                 updatedAt: now
             });
         }
-
         const inserted = await Attendance.insertMany(attendanceToInsert);
-
         return {
             message: "Attendance marked successfully",
             attendanceListLength: attendanceList.length,

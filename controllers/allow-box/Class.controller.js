@@ -17,8 +17,15 @@ const createClass = (classData) => {
 const updateClass = (id, classData) => {
     return new Promise(async (resolve, reject) => {
         try {
-            const updated = await Class.findByIdAndUpdate(id, classData, { new: true });
-            resolve(updated);
+            const existingClass = await Class.findById(id);
+            if (!existingClass) {
+                return reject({ statusCode: httpStatus.NOT_FOUND, message: "Class not found" });
+            }
+            const updated = await Class.findOneAndUpdate(
+                { _id: id },
+                classData,
+                { new: true, runValidators: true, context: 'query' }
+            ); resolve(updated);
         } catch (error) {
             reject(error);
         }
@@ -31,7 +38,7 @@ const getClassesBySchool = (schoolId, page, limit, search) => {
     };
     if (search && search.trim() !== "") {
         filter.name = { $regex: new RegExp(search, "i") };
-    }   
+    }
     return new Promise(async (resolve, reject) => {
         try {
             const skip = (page - 1) * limit;
@@ -83,10 +90,10 @@ const deleteClass = (id) => {
     })
 }
 
-module.exports = { 
-    createClass, 
-    updateClass, 
-    getClassesBySchool, 
+module.exports = {
+    createClass,
+    updateClass,
+    getClassesBySchool,
     getClass,
-    deleteClass 
+    deleteClass
 }

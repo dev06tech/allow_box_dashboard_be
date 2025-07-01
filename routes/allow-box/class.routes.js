@@ -9,7 +9,7 @@ const { validateClass } = require('../../middlewares/validations/allow-box/class
 const allowBoxClassController = require("../../controllers/allow-box/Class.controller");
 
 // allowbox classes related routes
-router.post("/allow-box-class", userAuth, validateClass, async (req, res, next) => {
+router.post("/allow-box-class", userAuth, validateClass, async (req, res, next) => {    
     const allowedRoles = ["super-admin"]
     if (req.user.role && !allowedRoles.includes(req.user.role)) {
         return res.status(httpStatus.FORBIDDEN).send({ message: "Access Denied" })

@@ -41,17 +41,26 @@ const classSchema = Joi.object({
                 return value;
             })
         )
-        .default([]),
+        .default([]).unique().optional(),
     subjects: Joi.array()
-        .items(
-            Joi.string().custom((value, helpers) => {
+    .items(
+        Joi.object({
+            name: Joi.string().required(),
+            assignedTeacher: Joi.string().custom((value, helpers) => {
                 if (!mongoose.Types.ObjectId.isValid(value)) {
                     return helpers.error("any.invalid");
                 }
                 return value;
-            })
-        )
-        .default([]),
+            }).required(),
+            substituteTeacher: Joi.string().custom((value, helpers) => {
+                if (!mongoose.Types.ObjectId.isValid(value)) {
+                    return helpers.error("any.invalid");
+                }
+                return value;
+            }).optional()
+        })
+    )
+    .unique('name').optional(),
     yearlyCLassFees: Joi.number().positive().required(),
 });
 

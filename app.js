@@ -19,6 +19,7 @@ const schoolRoutesAllowBox = require('./routes/allow-box/school.routes');
 const studentRoutesAllowBox = require('./routes/allow-box/student.routes');
 const superAdminRoutes = require('./routes/slate/superAdmin.routes');
 const schoolRoutesSlate = require('./routes/slate/school.routes');
+const studentRoutesSlate = require('./routes/slate/stduent.routes');
 const classRoutesSlate = require('./routes/slate/class.routes');
 const emailTemplateRoutes = require('./routes/slate/emailTemplates.routes');
 
@@ -80,6 +81,7 @@ app.use("/api/allow-box/school", schoolRoutesAllowBox);
 app.use("/api/allow-box/student", studentRoutesAllowBox);
 app.use("/api/slate/super-admin", superAdminRoutes);
 app.use("/api/slate/school", schoolRoutesSlate);
+app.use("/api/slate/student", studentRoutesSlate);
 app.use("/api/slate/class", classRoutesSlate);
 app.use("/api/slate/email-template", emailTemplateRoutes);
 

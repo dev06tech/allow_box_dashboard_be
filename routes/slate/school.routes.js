@@ -15,6 +15,17 @@ const emailerService = require('../../services/mailsender.service')
 
 
 //allowbox schools related routes
+
+router.post("/allow-box-school", superAdminAuth, validateCreateSchool, async (req, res, next) => {
+    try {
+        req.body.createdBy = req.superAdmin._id
+        const createdSchool = await allowBoxSchoolController.createSchool(req.body);
+        res.status(httpStatus.CREATED).json(createdSchool);
+    } catch (error) {
+        next(error);
+    }
+})
+
 router.get("/allow-box-schools", superAdminAuth, async (req, res, next) => {
     const page = parseInt(req.query.page);
     const limit = parseInt(req.query.limit);
@@ -38,8 +49,6 @@ router.get("/allow-box-schools", superAdminAuth, async (req, res, next) => {
 });
 
 router.get("/allow-box-school/:schoolId", superAdminAuth, async (req, res, next) => {
-    console.log(req.params);
-
     try {
         const result = await allowBoxSchoolController.getAllowBoxSchool(req.params.schoolId);
         res.status(httpStatus.OK).json(result);
@@ -77,6 +86,6 @@ router.delete("/allow-box-school/:schoolId", superAdminAuth, async (req, res, ne
     } catch (error) {
         next(error);
     }
-}); 
+});
 
 module.exports = router;

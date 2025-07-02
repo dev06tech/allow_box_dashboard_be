@@ -1,0 +1,66 @@
+const { default: httpStatus } = require('http-status');
+const ApiError = require('../../utils/ApiError');
+const StudentDetails = require('../../models/allow-box/studentDetails.model');
+const User = require('../../models/allow-box/user.model');
+
+const createStudentDetails = async (studentData) => {
+    try {
+        const isValidStudent = await User.findOne({
+            _id: studentData.studentId
+        });
+        if (!isValidStudent) {
+            throw new ApiError(httpStatus.NOT_FOUND, "Student not found");
+        }
+        const studentDetails = new StudentDetails(studentData);
+        await studentDetails.save();
+        return studentDetails;
+    } catch (error) {
+        throw error;
+    }
+};
+
+const updateStudentDetails = async (studentData) => {    
+    try {
+        const isValidStudent = await User.findOne({
+            _id: studentData.studentId
+        });
+        if (!isValidStudent) {
+            throw new ApiError(httpStatus.NOT_FOUND, "Student not found");
+        }
+        const studentDetails = await StudentDetails.findOneAndUpdate({ studentId: studentData.studentId }, studentData, { new: true });
+        return studentDetails;
+    } catch (error) {
+        throw error;
+    }
+};
+
+const deleteStudentDetails = async (studentId) => {
+    try {
+        const isValidStudent = await User.findOne({
+            _id: studentId
+        });
+        if (!isValidStudent) {
+            throw new ApiError(httpStatus.NOT_FOUND, "Student not found");
+        }
+        const studentDetails = await StudentDetails.findOneAndDelete({ studentId });
+        return studentDetails;
+    } catch (error) {
+        throw error;
+    }
+};
+
+const getStudentDetails = async (studentId) => {
+    try {
+        const studentDetails = await StudentDetails.findOne({ studentId }).populate('studentId', 'fullName email');
+        return studentDetails;
+    } catch (error) {
+        
+    }
+}
+
+module.exports = {
+    createStudentDetails,
+    updateStudentDetails,
+    deleteStudentDetails,
+    getStudentDetails
+}

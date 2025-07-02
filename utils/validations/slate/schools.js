@@ -16,7 +16,6 @@ const baseSchoolSchema = {
   schoolOwnerName: Joi.string().trim(),
   phone: Joi.string().trim().pattern(/^[0-9]{10,15}$/), 
   address: Joi.string().trim(),
-  createdBy: Joi.string().custom(objectIdValidator),
   isSchoolProfileCompleted: Joi.boolean(),
   paymentStatus: Joi.boolean(),
   numberOfStudents: Joi.number().integer().min(0),
@@ -34,7 +33,6 @@ const createSchool = Joi.object({
   schoolOwnerName: baseSchoolSchema.schoolOwnerName.required(),
   phone: baseSchoolSchema.phone.required(),
   address: baseSchoolSchema.address.required(),
-  createdBy: baseSchoolSchema.createdBy.required()
 });
 
 const updateSchool = Joi.object(baseSchoolSchema);

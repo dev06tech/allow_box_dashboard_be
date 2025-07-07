@@ -13,7 +13,7 @@ const studentDetailsSchema = new mongoose.Schema({
         required: true
     },
     dateOfBirth: {
-        type: Date
+        type: String
     },
     gender: {
         type: String

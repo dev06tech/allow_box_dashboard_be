@@ -19,7 +19,7 @@ const createStudentDetails = async (studentData) => {
     }
 };
 
-const updateStudentDetails = async (studentData) => {    
+const updateStudentDetails = async (studentData) => {
     try {
         const isValidStudent = await User.findOne({
             _id: studentData.studentId
@@ -50,11 +50,17 @@ const deleteStudentDetails = async (studentId) => {
 };
 
 const getStudentDetails = async (studentId) => {
+    const isValidStudent = await User.findOne({
+        _id: studentId
+    });
+    if (!isValidStudent) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Student not found");
+    }
     try {
         const studentDetails = await StudentDetails.findOne({ studentId }).populate('studentId', 'fullName email');
         return studentDetails;
     } catch (error) {
-        
+
     }
 }
 
